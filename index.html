@@ -1,22 +1,235 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><title>Solve My Homework AI — Legal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solve My Homework AI — Snap it. Solve it. Understand it.</title>
+<meta name="description" content="Stuck on a problem? Snap a photo and get a clear, step-by-step answer in seconds. Math, reading, writing, translation and more — Solve My Homework AI is your pocket study buddy.">
 <style>
-  :root{--blue:#4F6DF5}
-  *{box-sizing:border-box}
-  body{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;max-width:760px;margin:0 auto;padding:24px 18px 60px;color:#1e2430;line-height:1.6}
-  h1{color:var(--blue);font-size:26px;margin-bottom:4px}
-  h2{margin-top:28px;font-size:19px;border-bottom:1px solid #e6e9f2;padding-bottom:5px}
-  h3{font-size:16px;margin-top:20px}
-  a{color:var(--blue)}
-  .top{font-size:13px;color:#8b93a7;margin-bottom:24px}
-  .nav{margin:0 0 18px;font-size:14px}
-  .nav a{margin-right:14px;font-weight:600}
-  code{background:#f2f4f9;padding:1px 5px;border-radius:4px}
-  hr{border:none;border-top:1px solid #e6e9f2;margin:26px 0}
-  footer{margin-top:40px;font-size:12.5px;color:#8b93a7;text-align:center}
+  :root{
+    --blue:#4F6DF5; --blue-dark:#3a52d6; --ink:#141a2e; --muted:#5b6478;
+    --bg:#ffffff; --soft:#f4f6fd; --line:#e7ebf7; --violet:#8a5cf6; --mint:#18c29c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+
+  /* nav */
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+  .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--violet));display:grid;place-items:center;color:#fff;font-size:18px;box-shadow:0 6px 16px rgba(79,109,245,.35)}
+  .navlinks{display:flex;align-items:center;gap:26px;font-weight:600;font-size:14.5px;color:var(--muted)}
+  .navlinks a:hover{color:var(--ink)}
+  .btn{display:inline-block;padding:11px 20px;border-radius:11px;font-weight:700;font-size:14.5px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;box-shadow:0 8px 20px rgba(79,109,245,.35);transition:transform .12s ease,box-shadow .12s ease}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(79,109,245,.45)}
+  .navlinks .btn{color:#fff}
+  @media(max-width:640px){.navlinks a:not(.btn){display:none}}
+
+  /* hero */
+  .hero{position:relative;overflow:hidden;background:radial-gradient(1200px 500px at 15% -10%,rgba(138,92,246,.16),transparent 60%),radial-gradient(1000px 500px at 100% 0,rgba(79,109,245,.18),transparent 55%),var(--soft)}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:74px 0 84px}
+  @media(max-width:840px){.hero-grid{grid-template-columns:1fr;text-align:center;padding:56px 0 64px}}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);color:var(--blue);font-weight:700;font-size:13px;padding:7px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(20,26,46,.05)}
+  h1{font-size:clamp(34px,5.4vw,56px);line-height:1.05;letter-spacing:-.02em;margin:18px 0 16px;font-weight:800}
+  .grad{background:linear-gradient(120deg,var(--blue),var(--violet) 60%,var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{font-size:clamp(16px,2.2vw,19px);color:var(--muted);max-width:520px}
+  @media(max-width:840px){.sub{margin:0 auto}}
+  .cta{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap}
+  @media(max-width:840px){.cta{justify-content:center}}
+  .store{display:flex;align-items:center;gap:11px;background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;transition:transform .12s ease}
+  .store:hover{transform:translateY(-2px)}
+  .store small{display:block;font-size:11px;font-weight:600;opacity:.7;line-height:1}
+  .store b{font-size:16px;line-height:1.15}
+  .store .ic{font-size:22px}
+  .soon{font-size:12.5px;color:var(--muted);margin-top:14px;font-weight:600}
+  @media(max-width:840px){.soon{text-align:center}}
+
+  /* phone mock */
+  .phone-wrap{display:grid;place-items:center}
+  .phone{width:270px;height:540px;border-radius:38px;background:#0f1424;padding:12px;box-shadow:0 30px 60px rgba(30,40,80,.35),inset 0 0 0 2px rgba(255,255,255,.06);position:relative}
+  .screen{width:100%;height:100%;border-radius:28px;background:linear-gradient(160deg,#5566f0,#8a5cf6);overflow:hidden;position:relative;color:#fff}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:110px;height:20px;background:#0f1424;border-radius:0 0 14px 14px;z-index:3}
+  .screen-inner{padding:44px 18px 18px}
+  .s-card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:14px;backdrop-filter:blur(4px)}
+  .s-q{font-weight:800;font-size:15px}
+  .s-tag{display:inline-block;font-size:10.5px;font-weight:700;background:rgba(255,255,255,.22);padding:4px 9px;border-radius:999px;margin-bottom:8px}
+  .s-ans{background:#fff;color:var(--ink);border-radius:16px;padding:14px;margin-top:12px;font-size:12.5px;box-shadow:0 10px 24px rgba(0,0,0,.16)}
+  .s-step{display:flex;gap:8px;margin-top:8px}
+  .s-num{flex:0 0 20px;height:20px;border-radius:6px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+  .s-line{font-size:12px;color:var(--muted)}
+  .s-final{margin-top:10px;font-weight:800;color:var(--blue)}
+
+  /* section shells */
+  section.block{padding:72px 0}
+  .eyebrow{color:var(--blue);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12.5px;text-align:center}
+  h2{font-size:clamp(26px,3.6vw,38px);text-align:center;letter-spacing:-.02em;margin:10px auto 8px;font-weight:800;max-width:640px}
+  .lead{text-align:center;color:var(--muted);max-width:560px;margin:0 auto 40px}
+
+  /* features */
+  .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:840px){.feat{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.feat{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;transition:transform .14s ease,box-shadow .14s ease}
+  .card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(30,40,80,.10)}
+  .ic-badge{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:23px;margin-bottom:14px;background:var(--soft)}
+  .card h3{font-size:17px;margin-bottom:5px}
+  .card p{font-size:14px;color:var(--muted)}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;counter-reset:s}
+  @media(max-width:720px){.steps{grid-template-columns:1fr}}
+  .step{position:relative;background:var(--soft);border-radius:18px;padding:26px 22px}
+  .step::before{counter-increment:s;content:counter(s);position:absolute;top:-16px;left:22px;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;font-weight:800;display:grid;place-items:center;box-shadow:0 8px 18px rgba(79,109,245,.35)}
+  .step h3{margin:14px 0 5px;font-size:17px}
+  .step p{font-size:14px;color:var(--muted)}
+
+  /* pricing */
+  .prices{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:760px;margin:0 auto}
+  @media(max-width:640px){.prices{grid-template-columns:1fr}}
+  .plan{border:1px solid var(--line);border-radius:22px;padding:28px;background:#fff}
+  .plan.pro{border:0;background:linear-gradient(160deg,#20264a,#2c2166);color:#fff;position:relative;overflow:hidden}
+  .plan.pro::after{content:"";position:absolute;width:220px;height:220px;right:-60px;top:-70px;background:radial-gradient(circle,rgba(138,92,246,.55),transparent 60%)}
+  .plan h3{font-size:20px}
+  .price{font-size:36px;font-weight:800;margin:10px 0 2px}
+  .price span{font-size:15px;font-weight:600;color:var(--muted)}
+  .plan.pro .price span{color:rgba(255,255,255,.7)}
+  .tag{display:inline-block;font-size:12px;font-weight:800;background:var(--mint);color:#04231b;padding:5px 11px;border-radius:999px;margin-bottom:8px}
+  ul.list{list-style:none;margin:16px 0 0;display:grid;gap:9px}
+  ul.list li{display:flex;gap:10px;font-size:14.5px}
+  ul.list li::before{content:"✓";color:var(--mint);font-weight:800}
+  .plan.pro ul.list li::before{color:#7ef0d0}
+  .note{font-size:12px;color:var(--muted);margin-top:16px}
+  .plan.pro .note{color:rgba(255,255,255,.65)}
+
+  /* cta band */
+  .band{margin:20px 0 0;background:linear-gradient(120deg,var(--blue),var(--violet));border-radius:26px;padding:48px 28px;text-align:center;color:#fff;box-shadow:0 24px 50px rgba(79,109,245,.35)}
+  .band h2{color:#fff;max-width:560px}
+  .band .cta{justify-content:center;margin-top:22px}
+  .band .store{background:#fff;color:var(--ink)}
+
+  footer{border-top:1px solid var(--line);padding:34px 0;margin-top:40px}
+  .foot{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;color:var(--muted);font-size:13.5px}
+  .foot a{font-weight:600}.foot a:hover{color:var(--ink)}
+  .foot .links{display:flex;gap:20px}
 </style>
 </head>
-<body><h1>Solve My Homework AI</h1><p class="top">Legal documents</p>
-<p>Official privacy policy and terms of service for the Solve My Homework AI app.</p>
-<ul style="font-size:17px;line-height:2.2"><li><a href="privacy.html">Privacy Policy</a></li><li><a href="terms.html">Terms of Service</a></li></ul>
-<footer>Contact: keystonesrealtyllc@gmail.com</footer></body></html>
+<body>
+
+<header><div class="wrap nav">
+  <a class="brand" href="index.html"><span class="logo">✎</span> Solve My Homework AI</a>
+  <nav class="navlinks">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a class="btn" href="#get">Get the app</a>
+  </nav>
+</div></header>
+
+<section class="hero"><div class="wrap hero-grid">
+  <div>
+    <span class="pill">📸 Snap · Solve · Understand</span>
+    <h1>Homework, <span class="grad">figured out</span> in seconds.</h1>
+    <p class="sub">Stuck on a tricky problem? Just snap a photo. Solve My Homework AI gives you the answer <b>and</b> a clear, step-by-step explanation — so you actually learn it, not just copy it.</p>
+    <div class="cta" id="get">
+      <a class="store" href="#get"><span class="ic"></span><span><small>Coming soon on the</small><b>App Store</b></span></a>
+      <a class="store" href="#get"><span class="ic">▶</span><span><small>Coming soon on</small><b>Google Play</b></span></a>
+    </div>
+    <div class="soon">Free to start · No account needed · Launching soon on iOS &amp; Android</div>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone"><div class="screen"><div class="notch"></div><div class="screen-inner">
+      <div class="s-card">
+        <span class="s-tag">Math · Algebra</span>
+        <div class="s-q">Solve: 2x + 7 = 19</div>
+      </div>
+      <div class="s-ans">
+        <div style="font-weight:800;margin-bottom:4px">Step-by-step</div>
+        <div class="s-step"><span class="s-num">1</span><span class="s-line">Subtract 7 from both sides → 2x = 12</span></div>
+        <div class="s-step"><span class="s-num">2</span><span class="s-line">Divide both sides by 2 → x = 6</span></div>
+        <div class="s-final">✓ x = 6</div>
+      </div>
+    </div></div></div>
+  </div>
+</div></section>
+
+<section class="block" id="features"><div class="wrap">
+  <div class="eyebrow">Everything you need</div>
+  <h2>One app. Every subject.</h2>
+  <p class="lead">More than answers — a study buddy that explains, translates, checks, and writes alongside you.</p>
+  <div class="feat">
+    <div class="card"><div class="ic-badge">📸</div><h3>Snap any problem</h3><p>Point your camera at a question or worksheet and get a solution instantly.</p></div>
+    <div class="card"><div class="ic-badge">🪜</div><h3>Step-by-step answers</h3><p>See exactly how the answer is reached, so the next one is easier on your own.</p></div>
+    <div class="card"><div class="ic-badge">🌍</div><h3>Translate anything</h3><p>Turn passages and questions into the language you understand best.</p></div>
+    <div class="card"><div class="ic-badge">📚</div><h3>Multi-snap worksheets</h3><p>Capture a whole page of problems and work through them one by one.</p></div>
+    <div class="card"><div class="ic-badge">✍️</div><h3>Writing assistant</h3><p>Brainstorm, outline, and polish essays with a helper that keeps your voice.</p></div>
+    <div class="card"><div class="ic-badge">🧮</div><h3>Calculator &amp; summaries</h3><p>A built-in calculator plus quick summaries of readings and websites.</p></div>
+  </div>
+</div></section>
+
+<section class="block" id="how" style="background:var(--soft)"><div class="wrap">
+  <div class="eyebrow">Ridiculously simple</div>
+  <h2>From stuck to solved in 3 taps</h2>
+  <p class="lead">No sign-up, no fuss. Open the app and go.</p>
+  <div class="steps">
+    <div class="step"><h3>Snap or type</h3><p>Take a photo of the problem, or just type it in. Handwritten or printed — both work.</p></div>
+    <div class="step"><h3>Get the answer</h3><p>Our AI reads it and returns a clear solution with the reasoning laid out plainly.</p></div>
+    <div class="step"><h3>Actually learn it</h3><p>Follow the steps, ask a follow-up, and understand the "why" — not just the "what."</p></div>
+  </div>
+</div></section>
+
+<section class="block" id="pricing"><div class="wrap">
+  <div class="eyebrow">Simple pricing</div>
+  <h2>Start free. Go PRO when you're hooked.</h2>
+  <p class="lead">Free gets you real help every day. PRO removes the limits, hides the ads, and unlocks our smartest model.</p>
+  <div class="prices">
+    <div class="plan">
+      <h3>Free</h3>
+      <div class="price">$0<span> /forever</span></div>
+      <ul class="list">
+        <li>Up to 30 questions a day</li>
+        <li>Step-by-step explanations</li>
+        <li>Photo &amp; text input</li>
+        <li>Translation, calculator &amp; more</li>
+        <li>Supported by non-personalized ads</li>
+      </ul>
+      <div class="note">No account required. Just download and start.</div>
+    </div>
+    <div class="plan pro">
+      <span class="tag">3-day free trial</span>
+      <h3>PRO</h3>
+      <div class="price">$4.99<span> /week</span></div>
+      <ul class="list">
+        <li>Unlimited questions</li>
+        <li>Our smartest, most accurate model</li>
+        <li>Faster answers</li>
+        <li>Zero ads</li>
+        <li>Or save with $79.99 / year</li>
+      </ul>
+      <div class="note">Try PRO free for 3 days. Cancel anytime in your app store settings.</div>
+    </div>
+  </div>
+</div></section>
+
+<section class="block" style="padding-top:0"><div class="wrap">
+  <div class="band">
+    <div class="eyebrow" style="color:rgba(255,255,255,.85)">Your pocket study buddy</div>
+    <h2>Less stress tonight. Better grades this term.</h2>
+    <div class="cta">
+      <a class="store" href="#get"><span class="ic"></span><span><small>Coming soon on the</small><b>App Store</b></span></a>
+      <a class="store" href="#get"><span class="ic">▶</span><span><small>Coming soon on</small><b>Google Play</b></span></a>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap foot">
+  <div>© 2026 Solve My Homework AI · <a href="mailto:keystonesrealtyllc@gmail.com">keystonesrealtyllc@gmail.com</a></div>
+  <div class="links">
+    <a href="index.html">Home</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms</a>
+  </div>
+</div></footer>
+
+</body></html>
