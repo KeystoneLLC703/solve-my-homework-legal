@@ -2,6 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Solve My Homework AI — Snap it. Solve it. Understand it.</title>
 <meta name="description" content="Stuck on a problem? Snap a photo and get a clear, step-by-step answer in seconds. Math, reading, writing, translation and more — Solve My Homework AI is your pocket study buddy.">
+<link rel="icon" type="image/png" href="icon.png">
 <style>
   :root{
     --blue:#4F6DF5; --blue-dark:#3a52d6; --ink:#141a2e; --muted:#5b6478;
@@ -17,7 +18,7 @@
   header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .nav{display:flex;align-items:center;justify-content:space-between;height:64px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
-  .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--violet));display:grid;place-items:center;color:#fff;font-size:18px;box-shadow:0 6px 16px rgba(79,109,245,.35)}
+  .logo{width:36px;height:36px;border-radius:9px;object-fit:cover;display:block;box-shadow:0 6px 16px rgba(79,109,245,.35)}
   .navlinks{display:flex;align-items:center;gap:26px;font-weight:600;font-size:14.5px;color:var(--muted)}
   .navlinks a:hover{color:var(--ink)}
   .btn{display:inline-block;padding:11px 20px;border-radius:11px;font-weight:700;font-size:14.5px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;box-shadow:0 8px 20px rgba(79,109,245,.35);transition:transform .12s ease,box-shadow .12s ease}
@@ -116,7 +117,7 @@
 <body>
 
 <header><div class="wrap nav">
-  <a class="brand" href="index.html"><span class="logo">✎</span> Solve My Homework AI</a>
+  <a class="brand" href="index.html"><img class="logo" src="icon.png" alt="Solve My Homework AI logo"> Solve My Homework AI</a>
   <nav class="navlinks">
     <a href="#features">Features</a>
     <a href="#how">How it works</a>
