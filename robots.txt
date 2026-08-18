@@ -21,4 +21,4 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://keystonellc703.github.io/solve-my-homework-legal/sitemap.xml
+Sitemap: https://www.solvemyhomeworkai.com/sitemap.xml
