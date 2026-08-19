@@ -112,6 +112,28 @@
   .foot{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;color:var(--muted);font-size:13.5px}
   .foot a{font-weight:600}.foot a:hover{color:var(--ink)}
   .foot .links{display:flex;gap:20px}
+
+/* --- mobile header fit (added) --- */
+.brand{white-space:nowrap}
+.navlinks a{white-space:nowrap}
+@media(max-width:800px){
+.nav{height:auto;flex-wrap:wrap;justify-content:center;gap:4px;padding-top:8px;padding-bottom:8px}
+.brand{width:100%;justify-content:center;font-size:17px}
+.navlinks{width:100%;justify-content:center;flex-wrap:wrap;gap:16px;font-size:14px}
+.navlinks a:not(.btn){display:inline-block;padding:6px 0}
+.navlinks .btn{padding:10px 16px!important;font-size:14px!important;box-shadow:0 6px 14px rgba(79,109,245,.30)}
+}
+@media(max-width:520px){
+.brand{font-size:16px;gap:8px}
+.logo{width:30px;height:30px}
+.navlinks{gap:13px;font-size:13px}
+.navlinks .btn{padding:10px 14px!important;font-size:13px!important}
+}
+@media(max-width:400px){
+.brand{font-size:15px}
+.navlinks{gap:10px;font-size:12.5px}
+.navlinks .btn{padding:9px 12px!important;font-size:12.5px!important}
+}
 </style>
 </head>
 <body>
