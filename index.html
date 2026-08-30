@@ -123,8 +123,7 @@
   .prices{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:760px;margin:0 auto}
   @media(max-width:640px){.prices{grid-template-columns:1fr}}
   .plan{border:1px solid var(--line);border-radius:22px;padding:28px;background:#fff}
-  .plan.pro{border:0;background:linear-gradient(160deg,#20264a,#2c2166);color:#fff;position:relative;overflow:hidden;display:flex;flex-direction:column}
-  .plan.pro .note{margin-top:auto;padding-top:18px;text-align:center}
+  .plan.pro{border:0;background:linear-gradient(160deg,#20264a,#2c2166);color:#fff;position:relative;overflow:hidden}
   .plan.pro::after{content:"";position:absolute;width:220px;height:220px;right:-60px;top:-70px;background:radial-gradient(circle,rgba(138,92,246,.55),transparent 60%)}
   .plan h3{font-size:20px}
   .price{font-size:36px;font-weight:800;margin:10px 0 2px}
@@ -236,6 +235,7 @@
       <h3>PRO</h3>
       <div class="price">$9.99<span> /month</span></div>
       <ul class="list">
+        <li>Everything in Free</li>
         <li>Smartest model</li>
         <li>Faster answers</li>
         <li>Unlimited snaps &amp; chats</li>
@@ -243,7 +243,6 @@
         <li>Unlimited tutor help</li>
         <li>Higher queue limit</li>
       </ul>
-      <div class="note">Cancel anytime.</div>
     </div>
   </div>
 </div></section>
