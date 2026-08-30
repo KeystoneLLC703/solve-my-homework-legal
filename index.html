@@ -123,7 +123,8 @@
   .prices{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:760px;margin:0 auto}
   @media(max-width:640px){.prices{grid-template-columns:1fr}}
   .plan{border:1px solid var(--line);border-radius:22px;padding:28px;background:#fff}
-  .plan.pro{border:0;background:linear-gradient(160deg,#20264a,#2c2166);color:#fff;position:relative;overflow:hidden}
+  .plan.pro{border:0;background:linear-gradient(160deg,#20264a,#2c2166);color:#fff;position:relative;overflow:hidden;display:flex;flex-direction:column}
+  .plan.pro .note{margin-top:auto;padding-top:18px;text-align:center}
   .plan.pro::after{content:"";position:absolute;width:220px;height:220px;right:-60px;top:-70px;background:radial-gradient(circle,rgba(138,92,246,.55),transparent 60%)}
   .plan h3{font-size:20px}
   .price{font-size:36px;font-weight:800;margin:10px 0 2px}
@@ -223,28 +224,26 @@
       <div class="price">$0<span> /forever</span></div>
       <ul class="list">
         <li>Free questions every day</li>
-        <li>Step-by-step explanations, with tables and diagrams</li>
-        <li>Snap one question or a whole worksheet</li>
-        <li>AI Tutor you can talk to</li>
+        <li>Step-by-step explanations</li>
+        <li>Photo &amp; text input</li>
+        <li>AI Tutor</li>
         <li>Flashcards, matching, practice tests &amp; study guides</li>
         <li>Writing assistant, translation &amp; calculator</li>
         <li>Reading, website &amp; video summaries</li>
-        <li>Supported by non-personalized ads</li>
       </ul>
-      <div class="note">No account required. Just download and start.</div>
     </div>
     <div class="plan pro">
       <h3>PRO</h3>
       <div class="price">$9.99<span> /month</span></div>
       <ul class="list">
-        <li>Everything in Free, without the limits</li>
-        <li>Unlimited questions, snaps &amp; chats</li>
-        <li>Our smartest, most accurate model</li>
-        <li>Unlimited faster answers &mdash; no waiting</li>
-        <li>Zero ads</li>
-        <li>Or save with $69.99 / year</li>
+        <li>Smartest model</li>
+        <li>Faster answers</li>
+        <li>Unlimited snaps &amp; chats</li>
+        <li>Unlimited study guides &amp; practice tests</li>
+        <li>Unlimited tutor help</li>
+        <li>Higher queue limit</li>
       </ul>
-      <div class="note">Cancel anytime in your app store settings.</div>
+      <div class="note">Cancel anytime.</div>
     </div>
   </div>
 </div></section>
