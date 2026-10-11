@@ -1,272 +1,946 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Solve My Homework AI — Snap it. Solve it. Understand it.</title>
+<title>Solve My Homework AI — Snap it. Solve it. Learn it.</title>
 <meta name="description" content="Stuck on a problem? Snap a photo and get a clear, step-by-step answer in seconds. Math, reading, writing, translation and more — Solve My Homework AI is your pocket study buddy.">
+<meta name="theme-color" content="#D6E5F5">
 <link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --blue:#4F6DF5; --blue-dark:#3a52d6; --ink:#141a2e; --muted:#5b6478;
-    --bg:#ffffff; --soft:#f4f6fd; --line:#e7ebf7; --violet:#8a5cf6; --mint:#18c29c;
+    --paper:#D6E5F5;      /* page background (graph-paper blue) */
+    --paper-2:#E6EFFA;    /* lighter panel on the blue */
+    --grid:rgba(42,69,199,.075);
+    --ink:#10204A;        /* main text, 12.3:1 on paper */
+    --muted:#3B4A6B;      /* secondary text, 6.9:1 on paper */
+    --blue:#2A45C7;       /* links + accents, 5.9:1 on paper, 7.6:1 on white */
+    --blue-2:#4F6DF5;     /* app brand blue, fills only */
+    --violet:#7B5CF0;
+    --hi:#FFC93C;         /* highlighter yellow */
+    --white:#FFFFFF;
+    --line:rgba(16,32,74,.12);
+    --display:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --body:"Figtree",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+    --hand:"Caveat","Segoe Print","Bradley Hand",cursive;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+  html{scroll-behavior:smooth;background:var(--paper)}
+  body{
+    font-family:var(--body);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;
+    background-color:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;
+  }
   a{color:inherit;text-decoration:none}
-  .wrap{max-width:1060px;margin:0 auto;padding:0 20px}
+  /* jump links land just below the sticky top bar (its height is measured by the script) */
+  main [id]{scroll-margin-top:calc(var(--hh,80px) + 16px)}
+  button{font:inherit}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:8px}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+  h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;line-height:1.1}
+  [lang="ar"] h1,[lang="ar"] h2,[lang="ar"] h3,[lang="hi"] h1,[lang="hi"] h2,[lang="hi"] h3{letter-spacing:0;line-height:1.3}
 
-  /* nav */
-  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  /* The bar reflows rather than hiding anything: Features / How it works /
-     Pricing stay visible at every width, and "Get the app" is always the
-     right-most item and always sits inside the bar. */
-  .nav{display:flex;align-items:center;flex-wrap:wrap;gap:10px 26px;min-height:64px;padding:6px 20px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;min-width:0;flex:0 1 auto}
+  /* ---------- reading progress ---------- */
+  .progress{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--blue-2),var(--violet));z-index:60}
+
+  /* ---------- nav (reflows, never hides anything) ---------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(214,229,245,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .25s ease,box-shadow .25s ease}
+  header.scrolled{border-bottom-color:var(--line);box-shadow:0 6px 24px rgba(16,32,74,.08)}
+  .nav{display:flex;align-items:center;flex-wrap:wrap;gap:10px 28px;min-height:68px;padding:6px 20px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:18px;min-width:0;flex:0 1 auto}
   .bname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-  .logo{width:36px;height:36px;border-radius:9px;object-fit:cover;display:block;flex:0 0 auto;box-shadow:0 6px 16px rgba(79,109,245,.35)}
-  .navlinks{display:flex;align-items:center;gap:26px;font-weight:600;font-size:14.5px;color:var(--muted);margin-left:auto;flex:0 1 auto}
-  .navlinks a{white-space:nowrap}
-  .navlinks a:hover{color:var(--ink)}
-  .btn{display:inline-block;padding:13px 30px;border-radius:11px;font-weight:700;font-size:16px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;white-space:nowrap;flex:0 0 auto;box-shadow:0 8px 20px rgba(79,109,245,.35);transition:transform .12s ease,box-shadow .12s ease}
-  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(79,109,245,.45)}
+  .logo{width:38px;height:38px;border-radius:10px;object-fit:cover;display:block;flex:0 0 auto;box-shadow:0 6px 16px rgba(42,69,199,.3);transition:transform .3s ease}
+  .brand:hover .logo{transform:rotate(-8deg) scale(1.06)}
+  .navlinks{display:flex;align-items:center;gap:26px;font-weight:600;font-size:15px;color:var(--muted);margin-inline-start:auto;flex:0 1 auto}
+  .navlinks a{white-space:nowrap;position:relative;padding:4px 0}
+  .navlinks a::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--blue);border-radius:2px;transform:scaleX(0);transition:transform .25s ease}
+  .navlinks a:hover,.navlinks a.active{color:var(--ink)}
+  .navlinks a:hover::after,.navlinks a.active::after{transform:scaleX(1)}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;font-weight:700;font-size:15.5px;background:var(--ink);color:#fff;white-space:nowrap;flex:0 0 auto;box-shadow:0 4px 0 #050c22;transition:transform .15s ease,box-shadow .15s ease}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 #050c22}
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #050c22}
 
-  /* Not enough room for one row: brand + button stay on top (button hard
-     right), the three links move to their own centred row underneath. */
-  /* Below 920px one row no longer fits (measured: with Support in the bar it
-     holds down to 915px; it was 830px when there were only three links, and the
-     breakpoint moved with it). Brand + button stay on the top row with the
-     button hard right; the four links move to their own centred row. Nothing is
-     ever hidden. */
+  /* language picker */
+  .lang{position:relative}
+  .lang-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(255,255,255,.6);color:var(--ink);font-weight:600;font-size:14.5px;padding:7px 11px;border-radius:999px;cursor:pointer;transition:background .2s ease,border-color .2s ease}
+  .lang-btn:hover{background:#fff;border-color:rgba(42,69,199,.35)}
+  .lang-btn svg{width:18px;height:18px;flex:0 0 auto}
+  .lang-btn .chev{width:14px;height:14px;transition:transform .25s ease}
+  .lang.open .chev{transform:rotate(180deg)}
+  .lang-menu{position:absolute;top:calc(100% + 10px);inset-inline-end:0;min-width:200px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 40px rgba(16,32,74,.18);padding:6px;list-style:none;z-index:70;max-height:70vh;overflow:auto;opacity:0;transform:translateY(-6px) scale(.98);transform-origin:top right;pointer-events:none;visibility:hidden;transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s}
+  .lang.open .lang-menu{opacity:1;transform:none;pointer-events:auto;visibility:visible;transition:opacity .2s ease,transform .2s ease,visibility 0s}
+  .lang-menu button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;border:0;background:transparent;color:var(--ink);font-weight:600;font-size:15px;padding:9px 12px;border-radius:10px;cursor:pointer;text-align:start}
+  .lang-menu button small{color:var(--muted);font-weight:600;font-size:12.5px}
+  .lang-menu button:hover{background:var(--paper-2)}
+  .lang-menu button[aria-checked="true"]{background:#E7EEFF;color:var(--blue)}
+
   @media(max-width:920px){
     .nav{gap:8px 14px;padding:10px 20px}
     .brand{order:1;flex:1 1 0;min-width:0;font-size:16px}
     .logo{width:32px;height:32px;border-radius:8px}
-    .btn{order:2;margin-left:auto;padding:10px 17px;font-size:14.5px}
-    .navlinks{order:3;flex:1 0 100%;margin-left:0;justify-content:center;gap:24px;font-size:14.5px}
+    .btn{order:2;margin-inline-start:auto;padding:10px 16px;font-size:14.5px}
+    .navlinks{order:3;flex:1 0 100%;margin-inline-start:0;justify-content:center;flex-wrap:wrap;gap:6px 22px;font-size:14.5px}
   }
-  /* Large phones */
   @media(max-width:440px){
     .nav{gap:8px 12px}
     .brand{font-size:14px;gap:8px}
     .logo{width:30px;height:30px}
     .btn{padding:9px 13px;font-size:13.5px}
-    .navlinks{gap:18px;font-size:13.5px}
+    .navlinks{gap:16px;font-size:13.5px}
+    .lang-btn{padding:5px 9px;font-size:13.5px}
   }
-  /* Standard and small phones - tuned so the full name still fits beside the
-     button down to 360px. Below that it ellipsises, which is unavoidable. */
   @media(max-width:400px){
     .nav{gap:8px 10px}
     .brand{font-size:13px;gap:6px}
     .logo{width:26px;height:26px;border-radius:7px}
     .btn{padding:8px 11px;font-size:13px}
-    .navlinks{gap:14px;font-size:13px}
+    .navlinks{gap:12px;font-size:13px}
   }
 
-  /* hero */
-  .hero{position:relative;overflow:hidden;background:radial-gradient(1200px 500px at 15% -10%,rgba(138,92,246,.16),transparent 60%),radial-gradient(1000px 500px at 100% 0,rgba(79,109,245,.18),transparent 55%),var(--soft)}
-  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:74px 0 84px}
-  @media(max-width:840px){.hero-grid{grid-template-columns:1fr;text-align:center;padding:56px 0 64px}}
-  .pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);color:var(--blue);font-weight:700;font-size:13px;padding:7px 14px;border-radius:999px;box-shadow:0 4px 14px rgba(20,26,46,.05)}
-  h1{font-size:clamp(34px,5.4vw,56px);line-height:1.05;letter-spacing:-.02em;margin:18px 0 16px;font-weight:800}
-  .grad{background:linear-gradient(120deg,var(--blue),var(--violet) 60%,var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{font-size:clamp(16px,2.2vw,19px);color:var(--muted);max-width:520px}
-  @media(max-width:840px){.sub{margin:0 auto}}
-  .cta{display:flex;gap:14px;margin-top:28px;flex-wrap:wrap}
-  @media(max-width:840px){.cta{justify-content:center}}
-  .store{display:flex;align-items:center;gap:11px;background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;transition:transform .12s ease}
-  .store:hover{transform:translateY(-2px)}
-  .store small{display:block;font-size:11px;font-weight:600;opacity:.7;line-height:1}
-  .store b{font-size:16px;line-height:1.15}
-  .store .ic{font-size:22px}
-  .soon{font-size:12.5px;color:var(--muted);margin-top:14px;font-weight:600}
-  @media(max-width:840px){.soon{text-align:center}}
+  /* ---------- hero ---------- */
+  .hero{position:relative;overflow:hidden;overflow:clip}
+  .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;padding:72px 0 64px}
+  @media(max-width:860px){.hero-grid{grid-template-columns:1fr;text-align:center;padding:48px 0 40px;gap:40px}}
+  .tagline{display:inline-block;font-family:var(--hand);font-size:26px;font-weight:700;color:var(--blue);transform:rotate(-2deg)}
+  h1{font-size:clamp(40px,6.4vw,72px);font-weight:800;margin:10px 0 18px;line-height:1.05}
+  h1 .mark{background-image:linear-gradient(var(--hi),var(--hi));background-repeat:no-repeat;background-position:0 88%;background-size:100% .4em;-webkit-box-decoration-break:clone;box-decoration-break:clone;padding:0 .06em}
+  [dir="rtl"] h1 .mark{background-position:100% 88%}
+  .js h1 .mark{background-size:0% .4em}
+  .js.loaded h1 .mark{background-size:100% .4em;transition:background-size .9s cubic-bezier(.2,.8,.2,1) .5s}
+  .sub{font-size:clamp(17px,2.1vw,19.5px);color:var(--muted);max-width:33em}
+  @media(max-width:860px){.sub{margin:0 auto}}
+  .cta{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap}
+  @media(max-width:860px){.cta{justify-content:center}}
+  .store{display:flex;align-items:center;gap:12px;background:var(--ink);color:#fff;padding:12px 20px 12px 16px;border-radius:14px;font-weight:700;box-shadow:0 4px 0 #050c22;transition:transform .15s ease,box-shadow .15s ease;direction:ltr}
+  .store:hover{transform:translateY(-3px);box-shadow:0 7px 0 #050c22}
+  .store:active{transform:translateY(2px);box-shadow:0 1px 0 #050c22}
+  .store small{display:block;font-size:11.5px;font-weight:600;opacity:.8;line-height:1.1}
+  .store b{font-size:17px;line-height:1.15}
+  .store svg{width:24px;height:24px;flex:0 0 auto}
+  .perks{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:20px;font-size:14.5px;font-weight:600;color:var(--muted);list-style:none}
+  @media(max-width:860px){.perks{justify-content:center}}
+  .perks li{display:flex;align-items:center;gap:7px}
+  .perks li::before,ul.list li::before{content:"";flex:0 0 18px;width:18px;height:18px;border-radius:50%;background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3 3 7-7' fill='none' stroke='%232A45C7' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat;box-shadow:0 1px 3px rgba(16,32,74,.15)}
 
-  /* phone mock */
-  .phone-wrap{display:grid;place-items:center}
-  .phone{width:270px;height:540px;border-radius:38px;background:#0f1424;padding:12px;box-shadow:0 30px 60px rgba(30,40,80,.35),inset 0 0 0 2px rgba(255,255,255,.06);position:relative}
-  .screen{width:100%;height:100%;border-radius:28px;background:linear-gradient(160deg,#5566f0,#8a5cf6);overflow:hidden;position:relative;color:#fff}
-  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:110px;height:20px;background:#0f1424;border-radius:0 0 14px 14px;z-index:3}
-  .screen-inner{padding:44px 18px 18px}
-  .s-card{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:14px;backdrop-filter:blur(4px)}
-  .s-q{font-weight:800;font-size:15px}
-  .s-tag{display:inline-block;font-size:10.5px;font-weight:700;background:rgba(255,255,255,.22);padding:4px 9px;border-radius:999px;margin-bottom:8px}
-  .s-ans{background:#fff;color:var(--ink);border-radius:16px;padding:14px;margin-top:12px;font-size:12.5px;box-shadow:0 10px 24px rgba(0,0,0,.16)}
-  .s-step{display:flex;gap:8px;margin-top:8px}
-  .s-num{flex:0 0 20px;height:20px;border-radius:6px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
-  .s-line{font-size:12px;color:var(--muted)}
-  .s-final{margin-top:10px;font-weight:800;color:var(--blue)}
+  /* hero entrance: one orchestrated sequence on load */
+  .js .hero .rise{opacity:0;transform:translateY(18px)}
+  .js.loaded .hero .rise{opacity:1;transform:none;transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+  .js.loaded .hero .rise:nth-child(2){transition-delay:.08s}
+  .js.loaded .hero .rise:nth-child(3){transition-delay:.16s}
+  .js.loaded .hero .rise:nth-child(4){transition-delay:.24s}
+  .js.loaded .hero .rise:nth-child(5){transition-delay:.32s}
+  .js .phone-wrap{opacity:0;transform:translateY(30px) rotate(4deg)}
+  .js.loaded .phone-wrap{opacity:1;transform:rotate(2deg);transition:opacity .9s ease .2s,transform 1.1s cubic-bezier(.2,.8,.2,1) .2s}
 
-  /* section shells */
-  section.block{padding:72px 0}
-  .eyebrow{color:var(--blue);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12.5px;text-align:center}
-  h2{font-size:clamp(26px,3.6vw,38px);text-align:center;letter-spacing:-.02em;margin:10px auto 8px;font-weight:800;max-width:640px}
-  .lead{text-align:center;color:var(--muted);max-width:560px;margin:0 auto 40px}
+  /* ---------- phone demo ---------- */
+  .phone-wrap{display:grid;place-items:center;position:relative;transform:rotate(2deg);direction:ltr}
+  .phone-wrap::before{content:"";position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(79,109,245,.35),transparent 65%);filter:blur(10px);z-index:0}
+  .doodle{position:absolute;font-family:var(--hand);font-weight:700;color:var(--blue);font-size:22px;z-index:2;pointer-events:none;line-height:1.1}
+  .doodle.d1{top:6%;left:-2%;transform:rotate(-10deg)}
+  .doodle.d2{top:30%;right:-6%;transform:rotate(8deg);text-align:right;max-width:120px}
+  .doodle svg{display:block;width:60px;height:36px;margin-top:2px}
+  .doodle.d2 svg{margin:4px 0 0 auto}
+  @media(max-width:860px){.doodle.d1{left:4%}.doodle.d2{right:2%}}
+  @media(max-width:520px){.doodle{display:none}}
+  .phone{width:290px;height:590px;border-radius:44px;background:#0d1530;padding:12px;box-shadow:0 40px 70px rgba(16,32,74,.35),inset 0 0 0 2px rgba(255,255,255,.08);position:relative;z-index:1}
+  .screen{width:100%;height:100%;border-radius:33px;overflow:hidden;position:relative;background:#1a2346}
+  .island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:92px;height:26px;background:#05091a;border-radius:20px;z-index:6}
+  .cam{position:absolute;inset:0;background:
+      linear-gradient(transparent 31px,rgba(42,69,199,.18) 32px) 0 14px/100% 32px,
+      linear-gradient(90deg,transparent 38px,rgba(220,60,80,.35) 38px,rgba(220,60,80,.35) 40px,transparent 40px),
+      #fbfaf4;transition:filter .6s ease,transform .6s ease}
+  .problem{position:absolute;top:146px;left:54px;right:18px;font-family:var(--hand);font-weight:700;font-size:var(--psize,38px);line-height:1.1;color:#1d2a5c;transform:rotate(-3deg);text-align:left}
+  .problem small{display:block;font-family:var(--body);font-size:14px;font-weight:600;color:#4a5680;margin-bottom:6px}
+  .frame{position:absolute;top:118px;left:30px;right:30px;height:150px;transition:opacity .4s ease,transform .5s ease}
+  .frame i{position:absolute;width:28px;height:28px;border:4px solid var(--hi);filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+  .frame i:nth-child(1){top:0;left:0;border-right:0;border-bottom:0;border-radius:10px 0 0 0}
+  .frame i:nth-child(2){top:0;right:0;border-left:0;border-bottom:0;border-radius:0 10px 0 0}
+  .frame i:nth-child(3){bottom:0;left:0;border-right:0;border-top:0;border-radius:0 0 0 10px}
+  .frame i:nth-child(4){bottom:0;right:0;border-left:0;border-top:0;border-radius:0 0 10px 0}
+  .scanline{position:absolute;left:8px;right:8px;top:8px;height:3px;border-radius:3px;background:var(--hi);box-shadow:0 0 14px 3px rgba(255,201,60,.8);opacity:0}
+  .shutter{position:absolute;bottom:26px;left:50%;width:62px;height:62px;margin-left:-31px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.35);box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:4;transition:transform .15s ease,opacity .4s ease}
+  .shutter::after{content:"";position:absolute;inset:5px;border-radius:50%;background:#fff}
+  .flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:5;pointer-events:none}
+  .sheet{position:absolute;left:10px;right:10px;bottom:10px;background:#fff;border-radius:24px;padding:16px 16px 18px;box-shadow:0 -10px 30px rgba(16,32,74,.25);transform:translateY(110%);transition:transform .6s cubic-bezier(.2,.8,.2,1);z-index:4}
+  .sheet[dir="rtl"]{text-align:right}
+  .sheet .chip{display:inline-block;font-size:11.5px;font-weight:700;color:var(--blue);background:#E7EEFF;padding:4px 10px;border-radius:999px}
+  .sheet h4{font-family:var(--display);font-size:15px;margin:8px 0 2px;color:var(--ink)}
+  .st{display:flex;gap:9px;align-items:flex-start;margin-top:9px;opacity:0;transform:translateX(-10px);transition:opacity .4s ease,transform .4s ease}
+  .st b{flex:0 0 22px;height:22px;border-radius:7px;background:linear-gradient(135deg,var(--blue-2),var(--violet));color:#fff;font-size:11.5px;display:grid;place-items:center}
+  .st span{font-size:13px;color:var(--muted);line-height:1.4}
+  .final{margin-top:12px;font-family:var(--display);font-weight:800;font-size:18px;color:var(--ink);opacity:0;transition:opacity .4s ease}
+  .final em{font-style:normal;background:linear-gradient(var(--hi),var(--hi)) 0 85%/0% 45% no-repeat;transition:background-size .6s ease .15s;padding:0 2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .screen[data-stage="scan"] .scanline{opacity:1;animation:scan 1.4s ease-in-out infinite alternate}
+  .screen[data-stage="scan"] .frame{transform:scale(.97)}
+  .screen[data-stage="snap"] .shutter{transform:scale(.86)}
+  .screen[data-stage="snap"] .flash{animation:flash .5s ease}
+  .screen[data-stage="solve"] .cam,.screen[data-stage="done"] .cam{filter:blur(2px) brightness(.85);transform:scale(1.04)}
+  .screen[data-stage="solve"] .frame,.screen[data-stage="done"] .frame,
+  .screen[data-stage="solve"] .shutter,.screen[data-stage="done"] .shutter{opacity:0}
+  .screen[data-stage="solve"] .sheet,.screen[data-stage="done"] .sheet{transform:none}
+  .screen .st.on{opacity:1;transform:none}
+  .screen[data-stage="done"] .final{opacity:1}
+  .screen[data-stage="done"] .final em{background-size:100% 45%}
+  @keyframes scan{from{top:8px}to{top:calc(100% - 11px)}}
+  @keyframes flash{0%{opacity:0}20%{opacity:.95}100%{opacity:0}}
+  .demo-dots{display:flex;gap:8px;justify-content:center;margin-top:22px;position:relative;z-index:1}
+  .demo-dots button{width:34px;height:8px;border-radius:8px;border:0;background:rgba(16,32,74,.18);cursor:pointer;overflow:hidden;position:relative;padding:0}
+  .demo-dots button[aria-current="true"]::after{content:"";position:absolute;inset:0;background:var(--blue);transform-origin:0 50%;animation:fill 8.6s linear forwards}
+  .demo-dots button:hover{background:rgba(16,32,74,.3)}
+  @keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 
-  /* features */
-  .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-  @media(max-width:840px){.feat{grid-template-columns:1fr 1fr}}
-  @media(max-width:520px){.feat{grid-template-columns:1fr}}
-  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;transition:transform .14s ease,box-shadow .14s ease}
-  .card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(30,40,80,.10)}
-  .ic-badge{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:23px;margin-bottom:14px;background:var(--soft)}
-  .card h3{font-size:17px;margin-bottom:5px}
-  .card p{font-size:14px;color:var(--muted)}
+  /* ---------- subjects ticker ---------- */
+  .ticker{border-block:1px solid var(--line);background:rgba(255,255,255,.45);overflow:hidden;padding:14px 0;margin-top:8px;direction:ltr}
+  .ticker-track{display:flex;gap:12px;width:max-content;animation:tick 40s linear infinite}
+  .ticker:hover .ticker-track{animation-play-state:paused}
+  .ticker span{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;background:var(--white);border:1px solid var(--line);padding:8px 16px;border-radius:999px;font-weight:600;font-size:15px}
+  @keyframes tick{to{transform:translateX(-50%)}}
 
-  /* steps */
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;counter-reset:s}
-  @media(max-width:720px){.steps{grid-template-columns:1fr}}
-  .step{position:relative;background:var(--soft);border-radius:18px;padding:26px 22px}
-  .step::before{counter-increment:s;content:counter(s);position:absolute;top:-16px;left:22px;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff;font-weight:800;display:grid;place-items:center;box-shadow:0 8px 18px rgba(79,109,245,.35)}
-  .step h3{margin:14px 0 5px;font-size:17px}
-  .step p{font-size:14px;color:var(--muted)}
+  /* ---------- sections ---------- */
+  section.block{padding:96px 0}
+  .head{max-width:660px;margin:0 auto 48px;text-align:center}
+  .head .note,.band .note{font-family:var(--hand);font-size:24px;font-weight:700;color:var(--blue);display:inline-block;transform:rotate(-2deg)}
+  h2{font-size:clamp(30px,4.2vw,46px);font-weight:800;margin:6px 0 12px}
+  .lead{color:var(--muted);font-size:17.5px}
 
-  /* pricing */
-  .prices{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:760px;margin:0 auto}
-  @media(max-width:640px){.prices{grid-template-columns:1fr}}
-  .plan{border:1px solid var(--line);border-radius:22px;padding:28px;background:#fff}
-  .plan.pro{border:0;background:linear-gradient(160deg,#20264a,#2c2166);color:#fff;position:relative;overflow:hidden}
-  .plan.pro::after{content:"";position:absolute;width:220px;height:220px;right:-60px;top:-70px;background:radial-gradient(circle,rgba(138,92,246,.55),transparent 60%)}
-  .plan h3{font-size:20px}
-  .price{font-size:36px;font-weight:800;margin:10px 0 2px}
-  .price span{font-size:15px;font-weight:600;color:var(--muted)}
-  .plan.pro .price span{color:rgba(255,255,255,.7)}
-  .tag{display:inline-block;font-size:12px;font-weight:800;background:var(--mint);color:#04231b;padding:5px 11px;border-radius:999px;margin-bottom:8px}
-  ul.list{list-style:none;margin:16px 0 0;display:grid;gap:9px}
-  ul.list li{display:flex;gap:10px;font-size:14.5px}
-  ul.list li::before{content:"✓";color:var(--mint);font-weight:800}
-  .plan.pro ul.list li::before{color:#7ef0d0}
-  .note{font-size:12px;color:var(--muted);margin-top:16px}
-  .plan.pro .note{color:rgba(255,255,255,.65)}
+  /* scroll reveal (only when JS runs, so content never hides without it) */
+  .js .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
+  .js .reveal.in{opacity:1;transform:none}
 
-  /* cta band */
-  .band{margin:20px 0 0;background:linear-gradient(120deg,var(--blue),var(--violet));border-radius:26px;padding:48px 28px;text-align:center;color:#fff;box-shadow:0 24px 50px rgba(79,109,245,.35)}
-  .band h2{color:#fff;max-width:560px}
-  .band .cta{justify-content:center;margin-top:22px}
-  .band .store{background:#fff;color:var(--ink)}
+  /* ---------- features: the original 3 x 2 grid, on the blue ---------- */
+  .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:860px){.feat{grid-template-columns:1fr 1fr}}
+  @media(max-width:540px){.feat{grid-template-columns:1fr}}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:26px 24px;box-shadow:0 2px 0 rgba(16,32,74,.04)}
+  .js .card.reveal.in{transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease;transition-delay:var(--d,0s),var(--d,0s),0s}
+  .card:hover{box-shadow:0 18px 36px rgba(16,32,74,.12)}
+  .js .card.reveal.in:hover,.card:hover{transform:translateY(-5px)}
+  .ic-badge{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:25px;margin-bottom:16px;background:var(--paper-2);border:1px solid rgba(42,69,199,.14);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  .card:hover .ic-badge{transform:rotate(-8deg) scale(1.08)}
+  .card h3{font-size:19.5px;margin-bottom:6px}
+  .card p{font-size:15.5px;color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;list-style:none}
+  .chips li{background:var(--paper-2);border:1px solid rgba(42,69,199,.12);border-radius:999px;padding:4px 11px;font-size:13px;font-weight:600;color:var(--ink)}
 
-  footer{border-top:1px solid var(--line);padding:34px 0;margin-top:40px}
-  .foot{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;color:var(--muted);font-size:13.5px}
-  .foot a{font-weight:600}.foot a:hover{color:var(--ink)}
-  .foot .links{display:flex;gap:20px}
+  /* ---------- how it works ---------- */
+  .how{background:rgba(255,255,255,.4);border-block:1px solid var(--line)}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;position:relative;list-style:none}
+  .steps::before{content:"";position:absolute;top:28px;left:16%;right:16%;height:3px;background:var(--blue);border-radius:3px;transform-origin:0 50%;transform:scaleX(1);transition:transform 1.4s cubic-bezier(.4,0,.2,1) .2s}
+  [dir="rtl"] .steps::before{transform-origin:100% 50%}
+  .js .steps::before{transform:scaleX(0)}
+  .js .steps.in::before{transform:scaleX(1)}
+  @media(max-width:760px){.steps{grid-template-columns:1fr;gap:22px}.steps::before{display:none}}
+  .step{text-align:center;padding:0 10px;position:relative}
+  /* descriptions write themselves in, one after another, when the steps scroll into view */
+  .js .step p{opacity:0;transform:translateY(12px);filter:blur(6px);clip-path:inset(0 0 100% 0);transition:opacity .5s ease,transform .7s cubic-bezier(.2,.8,.2,1),filter .6s ease,clip-path .8s cubic-bezier(.2,.8,.2,1)}
+  .js .step.in p{opacity:1;transform:none;filter:none;clip-path:inset(0 0 0 0);transition-delay:.25s}
+  .js .step .num{transform:scale(.6);opacity:0}
+  .js .step.in .num{transform:none;opacity:1;transition:transform .5s cubic-bezier(.3,1.6,.5,1),opacity .3s ease,background .3s ease,color .3s ease}
+  .js .step.in:hover .num{transform:scale(1.08)}
+  /* side by side on wider screens: they appear one after another, left to right */
+  @media(min-width:761px){
+    .js .step.in:nth-child(1) p{transition-delay:.45s}
+    .js .step.in:nth-child(2) p{transition-delay:.85s}
+    .js .step.in:nth-child(3) p{transition-delay:1.25s}
+    .js .step.in:nth-child(2) .num{transition-delay:.4s,.4s,0s,0s}
+    .js .step.in:nth-child(3) .num{transition-delay:.8s,.8s,0s,0s}
+    .js .step.in:hover .num{transition-delay:0s}
+  }
+  .num{width:58px;height:58px;border-radius:50%;margin:0 auto 18px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:24px;background:var(--white);color:var(--blue);border:3px solid var(--blue);position:relative;z-index:1;transition:background .3s ease,color .3s ease,transform .4s cubic-bezier(.3,1.6,.5,1)}
+  .step:hover .num{background:var(--blue);color:#fff;transform:scale(1.08)}
+  .step h3{font-size:22px;margin-bottom:6px}
+  .step p{color:var(--muted);font-size:15.5px;max-width:22em;margin:0 auto}
+
+  /* ---------- pricing (both cards white) ---------- */
+  .prices{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:820px;margin:0 auto}
+  @media(max-width:680px){.prices{grid-template-columns:1fr}}
+  .plan{border:1px solid var(--line);border-radius:26px;padding:30px;background:var(--white);display:flex;flex-direction:column}
+  .plan h3{font-size:24px}
+  .plan .for{color:var(--muted);font-size:15px;margin-top:2px}
+  .price{font-family:var(--display);font-size:46px;font-weight:800;margin:14px 0 0;line-height:1;display:flex;align-items:baseline;gap:6px;min-height:52px;direction:ltr}
+  [dir="rtl"] .price{justify-content:flex-end}
+  .price span{font-family:var(--body);font-size:16px;font-weight:600;color:var(--muted)}
+  .price .amt{font:inherit;color:inherit;display:inline-block;transition:opacity .2s ease,transform .25s ease}
+  .price .amt.swap{opacity:0;transform:translateY(-8px)}
+  .toggle{display:inline-flex;background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:4px;margin-top:16px;position:relative;align-self:flex-start;direction:ltr}
+  .toggle button{border:0;background:transparent;color:var(--muted);font-weight:600;font-size:14px;padding:7px 16px;border-radius:999px;cursor:pointer;position:relative;z-index:1;transition:color .2s ease}
+  .toggle button[aria-pressed="true"]{color:var(--ink)}
+  .toggle .pill-bg{position:absolute;top:4px;bottom:4px;left:0;border-radius:999px;background:var(--hi);transition:transform .3s cubic-bezier(.2,.8,.2,1),width .3s ease}
+  .toggle-space{height:45px;margin-top:16px}
+  @media(max-width:680px){.toggle-space{display:none}}
+  .trial{font-size:13.5px;font-weight:700;color:var(--blue);margin-top:10px;min-height:20px}
+  ul.list{list-style:none;margin:20px 0 0;display:grid;gap:10px}
+  ul.list li{display:flex;gap:10px;font-size:15.5px;align-items:flex-start}
+  ul.list li::before{flex-basis:20px;width:20px;height:20px;margin-top:2px;background-color:#E7EEFF;box-shadow:none}
+  .fine{font-size:13px;color:var(--muted);text-align:center;margin-top:22px}
+
+  /* ---------- final band: soft and light ---------- */
+  .band{background:linear-gradient(140deg,#FFFFFF 0%,#EEF4FD 100%);border:1px solid var(--line);border-radius:32px;padding:64px 28px;text-align:center;color:var(--ink);position:relative;overflow:hidden;box-shadow:0 24px 50px rgba(16,32,74,.08)}
+  .band::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(42,69,199,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(42,69,199,.05) 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+  .band .blob{position:absolute;border-radius:50%;filter:blur(40px);opacity:.7;pointer-events:none;animation:drift 14s ease-in-out infinite alternate}
+  .band .b1{width:280px;height:280px;background:#C9D8FF;left:-60px;top:-80px}
+  .band .b2{width:240px;height:240px;background:#E4DAFF;right:-40px;bottom:-90px;animation-delay:-6s}
+  @keyframes drift{to{transform:translate(40px,30px) scale(1.15)}}
+  .band > *{position:relative}
+  .band h2{max-width:620px;margin:6px auto 10px}
+  .band p{color:var(--muted);font-size:17.5px}
+  .band .cta{justify-content:center;margin-top:30px}
+
+  footer{padding:40px 0 48px;margin-top:56px;border-top:1px solid var(--line)}
+  .foot{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;color:var(--muted);font-size:14.5px}
+  .foot a{font-weight:600}
+  .foot a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+  .foot .links{display:flex;flex-wrap:wrap;gap:8px 22px}
+
+  .top{position:fixed;right:18px;bottom:18px;width:46px;height:46px;border-radius:14px;border:0;background:var(--ink);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 8px 20px rgba(16,32,74,.3);opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .3s ease,transform .3s ease;z-index:40}
+  .top.show{opacity:1;transform:none;pointer-events:auto}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    html{scroll-behavior:auto}
+    .js .reveal,.js .hero .rise,.js .phone-wrap{opacity:1!important;transform:none!important}
+    .js .steps::before{transform:scaleX(1)!important}
+    .js h1 .mark{background-size:100% .4em!important}
+    .js .step p,.js .step .num{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}
+  }
 </style>
 </head>
 <body>
+<div class="progress" aria-hidden="true"></div>
 
-<header><div class="wrap nav">
+<header id="top"><div class="wrap nav">
   <a class="brand" href="index.html"><img class="logo" src="icon.png" alt="Solve My Homework AI logo"> <span class="bname">Solve My Homework AI</span></a>
-  <nav class="navlinks">
-    <a href="#features">Features</a>
-    <a href="#how">How it works</a>
-    <a href="#pricing">Pricing</a>
+  <nav class="navlinks" aria-label="Main">
+    <a href="#features" data-i18n="nav_features">Features</a>
+    <a href="#how" data-i18n="nav_how">How it works</a>
+    <a href="#pricing" data-i18n="nav_pricing">Pricing</a>
+    <div class="lang" id="lang">
+      <button class="lang-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="langMenu" id="langBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5c2.6 2.8 3.9 6 3.9 9.5s-1.3 6.7-3.9 9.5c-2.6-2.8-3.9-6-3.9-9.5s1.3-6.7 3.9-9.5z"/></svg>
+        <span id="langCode">EN</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <ul class="lang-menu" id="langMenu" role="menu" aria-labelledby="langBtn"></ul>
+    </div>
   </nav>
-  <a class="btn" href="#get">Get the app</a>
+  <a class="btn" href="#get" data-i18n="get_app">Get the app</a>
 </div></header>
 
+<main>
 <section class="hero"><div class="wrap hero-grid">
   <div>
-    <span class="pill">📸 Snap · Solve · Understand</span>
-    <h1>Homework, <span class="grad">figured out</span> in seconds.</h1>
-    <p class="sub">Stuck on a tricky problem? Just snap a photo. Solve My Homework AI gives you the answer <b>and</b> a clear, step-by-step explanation — so you actually learn it, not just copy it.</p>
-    <div class="cta">
-      <a class="store" href="https://apps.apple.com/app/id6794502613"><span class="ic"></span><span><small>Download on the</small><b>App Store</b></span></a>
-      <a class="store" href="https://play.google.com/store/apps/details?id=com.solvemyhomeworkai.app"><span class="ic">▶</span><span><small>Get it on</small><b>Google Play</b></span></a>
+    <span class="tagline rise" data-i18n="tagline">Snap it. Solve it. Learn it.</span>
+    <h1 class="rise"><span data-i18n="h1a">Homework, figured out in </span><span class="mark" data-i18n="h1b">seconds!</span></h1>
+    <div class="cta rise">
+      <a class="store" href="https://apps.apple.com/app/id6794502613"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.73-1.35-.14-2.64.8-3.33.8-.69 0-1.74-.78-2.87-.76-1.47.02-2.83.86-3.59 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.24 2.73 2.2 1.1-.05 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.07 2.65-2.13.84-1.22 1.18-2.41 1.2-2.47-.03-.01-2.3-.88-2.32-3.5zM14.2 6.13c.6-.73 1.01-1.75.9-2.76-.87.04-1.92.58-2.54 1.31-.56.64-1.05 1.67-.92 2.66.97.08 1.96-.49 2.56-1.21z"/></svg><span><small data-i18n="dl_on">Download on the</small><b>App Store</b></span></a>
+      <a class="store" href="https://play.google.com/store/apps/details?id=com.solvemyhomeworkai.app"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#34A853" d="M3.6 2.3c-.2.2-.3.6-.3 1v17.4c0 .4.1.8.3 1l.1.1 9.7-9.7v-.2L3.7 2.2z"/><path fill="#FBBC04" d="M16.6 15.3l-3.2-3.2v-.2l3.2-3.2.1.1 3.8 2.2c1.1.6 1.1 1.6 0 2.2l-3.8 2.2z"/><path fill="#EA4335" d="M16.7 15.2L13.4 12l-9.8 9.7c.4.4 1 .4 1.7.1l11.4-6.6"/><path fill="#4285F4" d="M16.7 8.8L5.3 2.2c-.7-.4-1.3-.3-1.7.1l9.8 9.7z"/></svg><span><small data-i18n="get_on">Get it on</small><b>Google Play</b></span></a>
     </div>
-    <div class="soon">Free to start · No account needed · On iOS &amp; Android</div>
+    <ul class="perks rise">
+      <li data-i18n="perk1">Free to start</li>
+      <li data-i18n="perk2">No account needed</li>
+      <li data-i18n="perk3">Available on iOS &amp; Android!</li>
+    </ul>
   </div>
-  <div class="phone-wrap">
-    <div class="phone"><div class="screen"><div class="notch"></div><div class="screen-inner">
-      <div class="s-card">
-        <span class="s-tag">Math · Algebra</span>
-        <div class="s-q">Solve: 2x + 7 = 19</div>
+
+  <div class="phone-wrap" aria-label="Animated demo: a homework problem is photographed and explained" role="img">
+    <div class="doodle d1"><span data-i18n="dd1">snap!</span><svg viewBox="0 0 60 36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 6c14 2 30 10 44 24"/><path d="M38 30l10 0 0-10"/></svg></div>
+    <div class="doodle d2"><span data-i18n="dd2">every step shown</span><svg viewBox="0 0 60 36" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M54 4C44 16 30 26 8 30"/><path d="M16 22l-8 8 10 4"/></svg></div>
+    <div class="phone"><div class="screen" id="demo" data-stage="scan">
+      <div class="island"></div>
+      <div class="cam">
+        <div class="problem" id="dProblem"><small>Solve for x</small>2x + 7 = 19</div>
+        <div class="frame"><i></i><i></i><i></i><i></i><div class="scanline"></div></div>
       </div>
-      <div class="s-ans">
-        <div style="font-weight:800;margin-bottom:4px">Step-by-step</div>
-        <div class="s-step"><span class="s-num">1</span><span class="s-line">Subtract 7 from both sides → 2x = 12</span></div>
-        <div class="s-step"><span class="s-num">2</span><span class="s-line">Divide both sides by 2 → x = 6</span></div>
-        <div class="s-final">✓ x = 6</div>
+      <div class="shutter"></div>
+      <div class="flash"></div>
+      <div class="sheet" id="dSheet">
+        <span class="chip" id="dTag">Algebra</span>
+        <h4 id="dTitle">Step-by-step</h4>
+        <div class="st"><b>1</b><span id="dS1">Subtract 7 from both sides → 2x = 12</span></div>
+        <div class="st"><b>2</b><span id="dS2">Divide both sides by 2 → x = 6</span></div>
+        <div class="final"><span id="dLabel">Answer:</span> <em id="dAns">x = 6</em></div>
       </div>
-    </div></div></div>
+    </div></div>
+    <div class="demo-dots" id="dots" aria-hidden="true">
+      <button type="button" tabindex="-1" aria-current="true"></button>
+      <button type="button" tabindex="-1"></button>
+      <button type="button" tabindex="-1"></button>
+    </div>
   </div>
-</div></section>
+</div>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="ticker"></div>
+</div>
+</section>
 
 <section class="block" id="features"><div class="wrap">
-  <div class="eyebrow">Everything you need</div>
-  <h2>One app. Every subject.</h2>
-  <p class="lead">More than answers — a study buddy that explains, translates, checks, and writes alongside you.</p>
+  <div class="head reveal">
+    <span class="note" data-i18n="f_note">more than answers</span>
+    <h2 data-i18n="f_h2">One app. Every subject.</h2>
+    <p class="lead" data-i18n="f_lead">A study buddy that explains, translates, checks, and writes alongside you.</p>
+  </div>
   <div class="feat">
-    <div class="card"><div class="ic-badge">📸</div><h3>Snap any problem</h3><p>Point your camera at a question or worksheet and get a solution instantly.</p></div>
-    <div class="card"><div class="ic-badge">🪜</div><h3>Step-by-step answers</h3><p>See exactly how the answer is reached, so the next one is easier on your own.</p></div>
-    <div class="card"><div class="ic-badge">🌍</div><h3>Translate anything</h3><p>Turn passages and questions into the language you understand best.</p></div>
-    <div class="card"><div class="ic-badge">📚</div><h3>Multi-snap worksheets</h3><p>Capture a whole page of problems and work through them one by one.</p></div>
-    <div class="card"><div class="ic-badge">✍️</div><h3>Writing assistant</h3><p>Brainstorm, outline, and polish essays with a helper that keeps your voice.</p></div>
-    <div class="card"><div class="ic-badge">🧮</div><h3>Calculator &amp; summaries</h3><p>A built-in calculator plus quick summaries of readings and websites.</p></div>
+    <div class="card reveal"><div class="ic-badge">📸</div><h3 data-i18n="c1t">Snap a whole worksheet</h3><p data-i18n="c1p">Point your camera at one question or a full page. Multi-snap lets you work through every problem, one by one.</p></div>
+    <div class="card reveal" style="--d:.08s"><div class="ic-badge">🪜</div><h3 data-i18n="c2t">Step-by-step answers</h3><p data-i18n="c2p">See exactly how the answer is reached, so the next one is easier on your own.</p></div>
+    <div class="card reveal" style="--d:.16s"><div class="ic-badge">💬</div><h3 data-i18n="c3t">Ask "why?"</h3><p data-i18n="c3p">Confused by step 2? Ask a follow-up and the AI Tutor explains it another way.</p></div>
+    <div class="card reveal"><div class="ic-badge">🌍</div><h3 data-i18n="c4t">Translate anything</h3><p data-i18n="c4p">Turn passages and questions into the language you understand best.</p></div>
+    <div class="card reveal" style="--d:.08s"><div class="ic-badge">✍️</div><h3 data-i18n="c5t">Writing assistant</h3><p data-i18n="c5p">Brainstorm, outline, and polish essays with a helper that keeps your voice.</p></div>
+    <div class="card reveal" style="--d:.16s"><div class="ic-badge">📚</div><h3 data-i18n="c6t">Study tools, built in</h3><p data-i18n="c6p">Turn what you're learning into practice, and get the gist of long readings fast.</p>
+    </div>
   </div>
 </div></section>
 
-<section class="block" id="how" style="background:var(--soft)"><div class="wrap">
-  <div class="eyebrow">Ridiculously simple</div>
-  <h2>From stuck to solved in 3 taps</h2>
-  <p class="lead">No sign-up, no fuss. Open the app and go.</p>
-  <div class="steps">
-    <div class="step"><h3>Snap or type</h3><p>Take a photo of the problem, or just type it in. Handwritten or printed — both work.</p></div>
-    <div class="step"><h3>Get the answer</h3><p>Our AI reads it and returns a clear solution with the reasoning laid out plainly.</p></div>
-    <div class="step"><h3>Actually learn it</h3><p>Follow the steps, ask a follow-up, and understand the "why" — not just the "what."</p></div>
+<section class="block how" id="how"><div class="wrap">
+  <div class="head reveal">
+    <span class="note" data-i18n="h_note">ridiculously simple</span>
+    <h2 data-i18n="h_h2">From stuck to solved in 3 taps</h2>
+    <p class="lead" data-i18n="h_lead">No sign-up, no fuss. Open the app and go.</p>
   </div>
+  <ol class="steps reveal">
+    <li class="step"><div class="num">1</div><h3 data-i18n="s1t">Snap it.</h3><p data-i18n="s1p">Take a photo of the problem, or just type it in. Handwritten or printed, both work.</p></li>
+    <li class="step"><div class="num">2</div><h3 data-i18n="s2t">Solve it.</h3><p data-i18n="s2p">Our AI reads it and returns a clear solution with the reasoning laid out plainly.</p></li>
+    <li class="step"><div class="num">3</div><h3 data-i18n="s3t">Learn it.</h3><p data-i18n="s3p">Follow the steps, ask a follow-up, and understand the "why," not just the "what."</p></li>
+  </ol>
 </div></section>
 
 <section class="block" id="pricing"><div class="wrap">
-  <div class="eyebrow">Simple pricing</div>
-  <h2>Start free. Go PRO when you're hooked.</h2>
-  <p class="lead">Free gets you real help every day. PRO removes the limits, hides the ads, and unlocks our smartest model.</p>
+  <div class="head reveal">
+    <span class="note" data-i18n="p_note">simple pricing</span>
+    <h2 data-i18n="p_h2">Start free. Go PRO when you're hooked.</h2>
+    <p class="lead" data-i18n="p_lead">Free gets you real help every day. PRO removes the limits, hides the ads, and unlocks our smartest model.</p>
+  </div>
   <div class="prices">
-    <div class="plan">
-      <h3>Free</h3>
-      <div class="price">$0<span> /forever</span></div>
+    <div class="plan reveal">
+      <h3 data-i18n="free">Free</h3>
+      <div class="for" data-i18n="free_for">Real help, every day</div>
+      <div class="toggle-space" aria-hidden="true"></div>
+      <div class="price">$0<span data-i18n="forever">/forever</span></div>
+      <div class="trial">&nbsp;</div>
       <ul class="list">
-        <li>Free questions every day</li>
-        <li>Step-by-step explanations</li>
-        <li>Photo &amp; text input</li>
-        <li>AI Tutor</li>
-        <li>Flashcards, matching, practice tests &amp; study guides</li>
-        <li>Writing assistant, translation &amp; calculator</li>
-        <li>Reading, website &amp; video summaries</li>
+        <li data-i18n="fl1">Free questions every day</li>
+        <li data-i18n="fl2">Step-by-step explanations</li>
+        <li data-i18n="fl3">Photo &amp; text input</li>
+        <li data-i18n="fl4">AI Tutor</li>
+        <li data-i18n="fl5">Flashcards, matching, practice tests &amp; study guides</li>
+        <li data-i18n="fl6">Writing assistant, translation &amp; calculator</li>
+        <li data-i18n="fl7">Reading, website &amp; video summaries</li>
       </ul>
     </div>
-    <div class="plan pro">
+    <div class="plan reveal" style="--d:.12s">
       <h3>PRO</h3>
-      <div class="price">$9.99<span> /month</span></div>
+      <div class="for" data-i18n="pro_for">No limits, no ads</div>
+      <div class="toggle" role="group" aria-label="Billing period">
+        <span class="pill-bg" aria-hidden="true"></span>
+        <button type="button" aria-pressed="true" data-plan="m" data-i18n="monthly">Monthly</button>
+        <button type="button" aria-pressed="false" data-plan="y" data-i18n="yearly">Yearly</button>
+      </div>
+      <div class="price"><span class="amt" id="pAmt">$9.99</span><span id="pPer">/month</span></div>
+      <div class="trial" id="pTrial" aria-live="polite">&nbsp;</div>
       <ul class="list">
-        <li>Everything in Free</li>
-        <li>Smartest model</li>
-        <li>Faster answers</li>
-        <li>Unlimited snaps &amp; chats</li>
-        <li>Unlimited study guides &amp; practice tests</li>
-        <li>Unlimited tutor help</li>
-        <li>Higher queue limit</li>
+        <li data-i18n="pl1">Everything in Free</li>
+        <li data-i18n="pl2">Smartest model</li>
+        <li data-i18n="pl3">Faster answers</li>
+        <li data-i18n="pl4">Unlimited snaps &amp; chats</li>
+        <li data-i18n="pl5">Unlimited study guides &amp; practice tests</li>
+        <li data-i18n="pl6">Unlimited tutor help</li>
+        <li data-i18n="pl7">No ads</li>
       </ul>
     </div>
   </div>
+  <p class="fine" data-i18n="fine">US prices shown. Prices can vary by country. Cancel anytime in your App Store or Google Play settings.</p>
 </div></section>
 
 <section class="block" style="padding-top:0" id="get"><div class="wrap">
-  <div class="band">
-    <div class="eyebrow" style="color:rgba(255,255,255,.85)">Your pocket study buddy</div>
-    <h2>Less stress tonight. Better grades this term.</h2>
+  <div class="band reveal">
+    <span class="blob b1" aria-hidden="true"></span><span class="blob b2" aria-hidden="true"></span>
+    <span class="note" data-i18n="b_note">your pocket study buddy</span>
+    <h2 data-i18n="b_h2">Less stress tonight. Better grades this term.</h2>
+    <p data-i18n="b_p">Free to download. Your first answer is one photo away.</p>
     <div class="cta">
-      <a class="store" href="https://apps.apple.com/app/id6794502613"><span class="ic"></span><span><small>Download on the</small><b>App Store</b></span></a>
-      <a class="store" href="https://play.google.com/store/apps/details?id=com.solvemyhomeworkai.app"><span class="ic">▶</span><span><small>Get it on</small><b>Google Play</b></span></a>
+      <a class="store" href="https://apps.apple.com/app/id6794502613"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.73-1.35-.14-2.64.8-3.33.8-.69 0-1.74-.78-2.87-.76-1.47.02-2.83.86-3.59 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.24 2.73 2.2 1.1-.05 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.07 2.65-2.13.84-1.22 1.18-2.41 1.2-2.47-.03-.01-2.3-.88-2.32-3.5zM14.2 6.13c.6-.73 1.01-1.75.9-2.76-.87.04-1.92.58-2.54 1.31-.56.64-1.05 1.67-.92 2.66.97.08 1.96-.49 2.56-1.21z"/></svg><span><small data-i18n="dl_on">Download on the</small><b>App Store</b></span></a>
+      <a class="store" href="https://play.google.com/store/apps/details?id=com.solvemyhomeworkai.app"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#34A853" d="M3.6 2.3c-.2.2-.3.6-.3 1v17.4c0 .4.1.8.3 1l.1.1 9.7-9.7v-.2L3.7 2.2z"/><path fill="#FBBC04" d="M16.6 15.3l-3.2-3.2v-.2l3.2-3.2.1.1 3.8 2.2c1.1.6 1.1 1.6 0 2.2l-3.8 2.2z"/><path fill="#EA4335" d="M16.7 15.2L13.4 12l-9.8 9.7c.4.4 1 .4 1.7.1l11.4-6.6"/><path fill="#4285F4" d="M16.7 8.8L5.3 2.2c-.7-.4-1.3-.3-1.7.1l9.8 9.7z"/></svg><span><small data-i18n="get_on">Get it on</small><b>Google Play</b></span></a>
     </div>
   </div>
 </div></section>
+</main>
 
 <footer><div class="wrap foot">
-  <div>© 2026 Solve My Homework AI · <a href="mailto:keystonesrealtyllc@gmail.com">keystonesrealtyllc@gmail.com</a></div>
+  <div>© 2026 Solve My Homework AI</div>
   <div class="links">
-    <a href="index.html">Home</a>
-    <a href="support.html">Support</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="terms.html">Terms</a>
+    <a href="index.html" data-i18n="ft_home">Home</a>
+    <a href="support.html" data-i18n="ft_support">Support</a>
+    <a href="privacy.html" data-i18n="ft_privacy">Privacy Policy</a>
+    <a href="terms.html" data-i18n="ft_terms">Terms</a>
     <a href="dmca.html">DMCA</a>
   </div>
 </div></footer>
 
+<button class="top" type="button" aria-label="Back to top" data-i18n-aria="top">↑</button>
+
+<script>
+/* Website text in the same 10 languages the app ships with.
+   Any key missing from a language falls back to English. */
+var I18N = {
+en:{name:"English",code:"EN",
+ dd1:"snap!",dd2:"every step shown",
+ nav_features:"Features",nav_how:"How it works",nav_pricing:"Pricing",get_app:"Get the app",lang:"Language",
+ tagline:"Snap it. Solve it. Learn it.",h1a:"Homework, figured out in ",h1b:"seconds!",
+ sub:"Stuck on a tricky problem? Just snap a photo. Solve My Homework AI gives you the answer <b>and</b> a clear, step-by-step explanation, so you actually learn it, not just copy it.",
+ dl_on:"Download on the",get_on:"Get it on",perk1:"Free to start",perk2:"No account needed",perk3:"Available on iOS &amp; Android!",
+ d1_tag:"Algebra",d1_small:"Solve for x",d1_title:"Step-by-step",d1_s1:"Subtract 7 from both sides → 2x = 12",d1_s2:"Divide both sides by 2 → x = 6",d1_label:"Answer:",
+ d2_tag:"AI Tutor",d2_small:"Ask the AI Tutor",d2_big:"Why is 2⁰ = 1?",d2_title:"Tutor explains",d2_s1:"Look at the pattern: 2³ = 8 → 2² = 4 → 2¹ = 2",d2_s2:"Each step divides by 2, so 2⁰ = 2 ÷ 2 = 1",d2_label:"So:",
+ d3_tag:"Translate",d3_small:"Translate to English",d3_src:"¿Dónde está la biblioteca?",d3_title:"Translation",d3_s1:"Detected: Spanish",d3_s2:"“dónde” = where, “biblioteca” = library",d3_label:"English:",d3_ans:"Where is the library?",
+ subjects:["Fractions","Geometry","Algebra","Calculus","Science","History","Reading passages","Essays &amp; outlines","Translation","Word problems"],
+ f_note:"more than answers",f_h2:"One app. Every subject.",f_lead:"A study buddy that explains, translates, checks, and writes alongside you.",
+ c1t:"Snap a whole worksheet",c1p:"Point your camera at one question or a full page. Multi-snap lets you work through every problem, one by one.",
+ c2t:"Step-by-step answers",c2p:"See exactly how the answer is reached, so the next one is easier on your own.",
+ c3t:"Ask “why?”",c3p:"Confused by step 2? Ask a follow-up and the AI Tutor explains it another way.",
+ c4t:"Translate anything",c4p:"Turn passages and questions into the language you understand best.",
+ c5t:"Writing assistant",c5p:"Brainstorm, outline, and polish essays with a helper that keeps your voice.",
+ c6t:"Study tools, built in",c6p:"Turn what you're learning into practice, and get the gist of long readings fast.",
+ t1:"Flashcards",t2:"Matching",t3:"Practice tests",t4:"Study guides",t5:"Calculator",t6:"Reading &amp; video summaries",
+ h_note:"ridiculously simple",h_h2:"From stuck to solved in 3 taps",h_lead:"No sign-up, no fuss. Open the app and go.",
+ s1t:"Snap it.",s1p:"Take a photo of the problem, or just type it in. Handwritten or printed, both work.",
+ s2t:"Solve it.",s2p:"Our AI reads it and returns a clear solution with the reasoning laid out plainly.",
+ s3t:"Learn it.",s3p:"Follow the steps, ask a follow-up, and understand the “why,” not just the “what.”",
+ p_note:"simple pricing",p_h2:"Start free. Go PRO when you're hooked.",p_lead:"Free gets you real help every day. PRO removes the limits, hides the ads, and unlocks our smartest model.",
+ free:"Free",free_for:"Real help, every day",forever:"/forever",
+ fl1:"Free questions every day",fl2:"Step-by-step explanations",fl3:"Photo &amp; text input",fl4:"AI Tutor",fl5:"Flashcards, matching, practice tests &amp; study guides",fl6:"Writing assistant, translation &amp; calculator",fl7:"Reading, website &amp; video summaries",
+ pro_for:"No limits, no ads",monthly:"Monthly",yearly:"Yearly",per_m:"/month",per_y:"/year",trial:"Includes a 3-day free trial",
+ pl1:"Everything in Free",pl2:"Smartest model",pl3:"Faster answers",pl4:"Unlimited snaps &amp; chats",pl5:"Unlimited study guides &amp; practice tests",pl6:"Unlimited tutor help",pl7:"No ads",
+ fine:"US prices shown. Prices can vary by country. Cancel anytime in your App Store or Google Play settings.",
+ b_note:"your pocket study buddy",b_h2:"Less stress tonight. Better grades this term.",b_p:"Free to download. Your first answer is one photo away.",
+ ft_home:"Home",ft_support:"Support",ft_privacy:"Privacy Policy",ft_terms:"Terms",top:"Back to top"},
+
+es:{name:"Español",code:"ES",
+ dd1:"¡clic!",dd2:"cada paso explicado",
+ nav_features:"Funciones",nav_how:"Cómo funciona",nav_pricing:"Precios",get_app:"Descargar app",lang:"Idioma",
+ tagline:"Tómale foto. Resuélvelo. Apréndelo.",h1a:"¡Tareas resueltas en ",h1b:"segundos!",
+ sub:"¿Un problema difícil te tiene atascado? Solo tómale una foto. Solve My Homework AI te da la respuesta <b>y</b> una explicación clara, paso a paso, para que de verdad lo aprendas, no solo lo copies.",
+ dl_on:"Descárgalo en",get_on:"Disponible en",perk1:"Gratis para empezar",perk2:"Sin crear cuenta",perk3:"¡Disponible en iOS y Android!",
+ d1_tag:"Álgebra",d1_small:"Despeja x",d1_title:"Paso a paso",d1_s1:"Resta 7 en ambos lados → 2x = 12",d1_s2:"Divide ambos lados entre 2 → x = 6",d1_label:"Respuesta:",
+ d2_tag:"Tutor IA",d2_small:"Pregúntale al Tutor IA",d2_big:"¿Por qué 2⁰ = 1?",d2_title:"El tutor explica",d2_s1:"Mira el patrón: 2³ = 8 → 2² = 4 → 2¹ = 2",d2_s2:"Cada paso divide entre 2, así que 2⁰ = 2 ÷ 2 = 1",d2_label:"Entonces:",
+ d3_tag:"Traducir",d3_small:"Traducir al español",d3_src:"Où est la bibliothèque ?",d3_title:"Traducción",d3_s1:"Idioma detectado: francés",d3_s2:"“où” = dónde, “bibliothèque” = biblioteca",d3_label:"Español:",d3_ans:"¿Dónde está la biblioteca?",
+ subjects:["Fracciones","Geometría","Álgebra","Cálculo","Ciencias","Historia","Lecturas","Ensayos y esquemas","Traducción","Problemas de texto"],
+ f_note:"más que respuestas",f_h2:"Una app. Todas las materias.",f_lead:"Un compañero de estudio que explica, traduce, revisa y escribe contigo.",
+ c1t:"Escanea una hoja completa",c1p:"Apunta la cámara a una pregunta o a una página entera. Con la multifoto resuelves cada problema, uno por uno.",
+ c2t:"Respuestas paso a paso",c2p:"Mira exactamente cómo se llega a la respuesta, para que la próxima te salga solo.",
+ c3t:"Pregunta “¿por qué?”",c3p:"¿No entiendes el paso 2? Haz otra pregunta y el Tutor IA te lo explica de otra forma.",
+ c4t:"Traduce lo que sea",c4p:"Pasa textos y preguntas al idioma que mejor entiendes.",
+ c5t:"Asistente de escritura",c5p:"Genera ideas, haz esquemas y pule ensayos con una ayuda que respeta tu voz.",
+ c6t:"Herramientas de estudio incluidas",c6p:"Convierte lo que aprendes en práctica y capta rápido la idea de lecturas largas.",
+ t1:"Tarjetas",t2:"Emparejar",t3:"Exámenes de práctica",t4:"Guías de estudio",t5:"Calculadora",t6:"Resúmenes de lecturas y videos",
+ h_note:"facilísimo",h_h2:"De atascado a resuelto en 3 toques",h_lead:"Sin registro, sin complicaciones. Abre la app y listo.",
+ s1t:"Tómale foto.",s1p:"Toma una foto del problema o escríbelo. A mano o impreso, ambos funcionan.",
+ s2t:"Resuélvelo.",s2p:"Nuestra IA lo lee y te da una solución clara con el razonamiento bien explicado.",
+ s3t:"Apréndelo.",s3p:"Sigue los pasos, haz preguntas y entiende el “por qué”, no solo el “qué”.",
+ p_note:"precios sencillos",p_h2:"Empieza gratis. Pásate a PRO cuando te enganches.",p_lead:"Gratis tienes ayuda real todos los días. PRO quita los límites, oculta los anuncios y desbloquea nuestro modelo más inteligente.",
+ free:"Gratis",free_for:"Ayuda real, todos los días",forever:"/siempre",
+ fl1:"Preguntas gratis cada día",fl2:"Explicaciones paso a paso",fl3:"Foto y texto",fl4:"Tutor IA",fl5:"Tarjetas, emparejar, exámenes de práctica y guías de estudio",fl6:"Asistente de escritura, traducción y calculadora",fl7:"Resúmenes de lecturas, sitios web y videos",
+ pro_for:"Sin límites, sin anuncios",monthly:"Mensual",yearly:"Anual",per_m:"/mes",per_y:"/año",trial:"Incluye 3 días de prueba gratis",
+ pl1:"Todo lo de Gratis",pl2:"El modelo más inteligente",pl3:"Respuestas más rápidas",pl4:"Fotos y chats ilimitados",pl5:"Guías de estudio y exámenes de práctica ilimitados",pl6:"Ayuda ilimitada del tutor",pl7:"Sin anuncios",
+ fine:"Precios en EE. UU. Pueden variar según el país. Cancela cuando quieras en la configuración de App Store o Google Play.",
+ b_note:"tu compañero de estudio de bolsillo",b_h2:"Menos estrés esta noche. Mejores notas este ciclo.",b_p:"Descarga gratis. Tu primera respuesta está a una foto de distancia.",
+ ft_home:"Inicio",ft_support:"Soporte",ft_privacy:"Política de privacidad",ft_terms:"Términos",top:"Volver arriba"},
+
+fr:{name:"Français",code:"FR",
+ dd1:"clic !",dd2:"chaque étape expliquée",
+ nav_features:"Fonctionnalités",nav_how:"Comment ça marche",nav_pricing:"Tarifs",get_app:"Télécharger",lang:"Langue",
+ tagline:"Prends-le en photo. Résous-le. Apprends-le.",h1a:"Tes devoirs, résolus en quelques ",h1b:"secondes !",
+ sub:"Bloqué sur un problème difficile ? Prends-le simplement en photo. Solve My Homework AI te donne la réponse <b>et</b> une explication claire, étape par étape, pour que tu comprennes vraiment au lieu de recopier.",
+ dl_on:"Télécharger dans l'",get_on:"Disponible sur",perk1:"Gratuit pour commencer",perk2:"Aucun compte requis",perk3:"Disponible sur iOS et Android !",
+ d1_tag:"Algèbre",d1_small:"Résous pour x",d1_title:"Étape par étape",d1_s1:"Soustrais 7 des deux côtés → 2x = 12",d1_s2:"Divise les deux côtés par 2 → x = 6",d1_label:"Réponse :",
+ d2_tag:"Tuteur IA",d2_small:"Demande au Tuteur IA",d2_big:"Pourquoi 2⁰ = 1 ?",d2_title:"Le tuteur explique",d2_s1:"Regarde la suite : 2³ = 8 → 2² = 4 → 2¹ = 2",d2_s2:"Chaque étape divise par 2, donc 2⁰ = 2 ÷ 2 = 1",d2_label:"Donc :",
+ d3_tag:"Traduire",d3_small:"Traduire en français",d3_src:"¿Dónde está la biblioteca?",d3_title:"Traduction",d3_s1:"Langue détectée : espagnol",d3_s2:"« dónde » = où, « biblioteca » = bibliothèque",d3_label:"Français :",d3_ans:"Où est la bibliothèque ?",
+ subjects:["Fractions","Géométrie","Algèbre","Calcul","Sciences","Histoire","Compréhension de texte","Rédactions et plans","Traduction","Problèmes"],
+ f_note:"plus que des réponses",f_h2:"Une appli. Toutes les matières.",f_lead:"Un compagnon d'étude qui explique, traduit, vérifie et écrit avec toi.",
+ c1t:"Photographie toute une fiche",c1p:"Vise une seule question ou une page entière. Le multi-photo te permet de traiter chaque exercice, un par un.",
+ c2t:"Réponses étape par étape",c2p:"Vois exactement comment on arrive à la réponse, pour réussir la prochaine tout seul.",
+ c3t:"Demande « pourquoi ? »",c3p:"L'étape 2 n'est pas claire ? Pose une question et le Tuteur IA t'explique autrement.",
+ c4t:"Traduis tout",c4p:"Transforme textes et questions dans la langue que tu comprends le mieux.",
+ c5t:"Assistant d'écriture",c5p:"Trouve des idées, fais un plan et peaufine tes rédactions avec une aide qui garde ton style.",
+ c6t:"Outils d'étude intégrés",c6p:"Transforme ce que tu apprends en exercices et saisis vite l'essentiel des longues lectures.",
+ t1:"Cartes mémoire",t2:"Associations",t3:"Tests d'entraînement",t4:"Fiches de révision",t5:"Calculatrice",t6:"Résumés de lectures et vidéos",
+ h_note:"super simple",h_h2:"De bloqué à résolu en 3 gestes",h_lead:"Pas d'inscription, pas de prise de tête. Ouvre l'appli et c'est parti.",
+ s1t:"Prends-le en photo.",s1p:"Prends le problème en photo ou tape-le. Écrit à la main ou imprimé, les deux marchent.",
+ s2t:"Résous-le.",s2p:"Notre IA le lit et te donne une solution claire, avec le raisonnement expliqué simplement.",
+ s3t:"Apprends-le.",s3p:"Suis les étapes, pose une question et comprends le « pourquoi », pas seulement le « quoi ».",
+ p_note:"des prix simples",p_h2:"Commence gratuitement. Passe à PRO quand tu es conquis.",p_lead:"La version gratuite t'aide vraiment chaque jour. PRO supprime les limites, masque les pubs et débloque notre modèle le plus intelligent.",
+ free:"Gratuit",free_for:"Une vraie aide, chaque jour",forever:"/pour toujours",
+ fl1:"Questions gratuites chaque jour",fl2:"Explications étape par étape",fl3:"Photo et texte",fl4:"Tuteur IA",fl5:"Cartes mémoire, associations, tests d'entraînement et fiches de révision",fl6:"Assistant d'écriture, traduction et calculatrice",fl7:"Résumés de lectures, de sites web et de vidéos",
+ pro_for:"Sans limites, sans pubs",monthly:"Mensuel",yearly:"Annuel",per_m:"/mois",per_y:"/an",trial:"Inclut 3 jours d'essai gratuit",
+ pl1:"Tout ce qu'offre Gratuit",pl2:"Le modèle le plus intelligent",pl3:"Réponses plus rapides",pl4:"Photos et discussions illimitées",pl5:"Fiches de révision et tests d'entraînement illimités",pl6:"Aide illimitée du tuteur",pl7:"Sans pubs",
+ fine:"Prix américains affichés. Les prix peuvent varier selon le pays. Annule à tout moment dans les réglages de l'App Store ou de Google Play.",
+ b_note:"ton compagnon d'étude de poche",b_h2:"Moins de stress ce soir. De meilleures notes ce trimestre.",b_p:"Téléchargement gratuit. Ta première réponse est à une photo près.",
+ ft_home:"Accueil",ft_support:"Assistance",ft_privacy:"Politique de confidentialité",ft_terms:"Conditions",top:"Retour en haut"},
+
+de:{name:"Deutsch",code:"DE",
+ dd1:"Klick!",dd2:"jeder Schritt erklärt",
+ nav_features:"Funktionen",nav_how:"So funktioniert's",nav_pricing:"Preise",get_app:"App holen",lang:"Sprache",
+ tagline:"Fotografieren. Lösen. Lernen.",h1a:"Hausaufgaben, gelöst in ",h1b:"Sekunden!",
+ sub:"Hängst du an einer kniffligen Aufgabe? Mach einfach ein Foto. Solve My Homework AI gibt dir die Antwort <b>und</b> eine klare Schritt-für-Schritt-Erklärung, damit du es wirklich lernst, statt nur abzuschreiben.",
+ dl_on:"Laden im",get_on:"Jetzt bei",perk1:"Kostenlos starten",perk2:"Kein Konto nötig",perk3:"Verfügbar für iOS und Android!",
+ d1_tag:"Algebra",d1_small:"Löse nach x auf",d1_title:"Schritt für Schritt",d1_s1:"Auf beiden Seiten 7 abziehen → 2x = 12",d1_s2:"Beide Seiten durch 2 teilen → x = 6",d1_label:"Antwort:",
+ d2_tag:"KI-Tutor",d2_small:"Frag den KI-Tutor",d2_big:"Warum ist 2⁰ = 1?",d2_title:"Der Tutor erklärt",d2_s1:"Sieh dir das Muster an: 2³ = 8 → 2² = 4 → 2¹ = 2",d2_s2:"Jeder Schritt teilt durch 2, also 2⁰ = 2 ÷ 2 = 1",d2_label:"Also:",
+ d3_tag:"Übersetzen",d3_small:"Ins Deutsche übersetzen",d3_src:"¿Dónde está la biblioteca?",d3_title:"Übersetzung",d3_s1:"Erkannt: Spanisch",d3_s2:"„dónde“ = wo, „biblioteca“ = Bibliothek",d3_label:"Deutsch:",d3_ans:"Wo ist die Bibliothek?",
+ subjects:["Brüche","Geometrie","Algebra","Analysis","Naturwissenschaften","Geschichte","Lesetexte","Aufsätze &amp; Gliederungen","Übersetzung","Textaufgaben"],
+ f_note:"mehr als Antworten",f_h2:"Eine App. Jedes Fach.",f_lead:"Ein Lernbuddy, der erklärt, übersetzt, prüft und mit dir schreibt.",
+ c1t:"Ganze Arbeitsblätter scannen",c1p:"Richte die Kamera auf eine Frage oder eine ganze Seite. Mit Multi-Snap gehst du jede Aufgabe einzeln durch.",
+ c2t:"Antworten Schritt für Schritt",c2p:"Sieh genau, wie man auf die Antwort kommt, damit du die nächste Aufgabe selbst schaffst.",
+ c3t:"Frag „Warum?“",c3p:"Schritt 2 unklar? Stell eine Rückfrage und der KI-Tutor erklärt es dir anders.",
+ c4t:"Alles übersetzen",c4p:"Übertrage Texte und Fragen in die Sprache, die du am besten verstehst.",
+ c5t:"Schreibassistent",c5p:"Ideen sammeln, gliedern und Aufsätze verfeinern, mit einer Hilfe, die deinen Stil beibehält.",
+ c6t:"Lerntools inklusive",c6p:"Mach aus dem Gelernten Übungen und erfasse lange Texte schnell im Kern.",
+ t1:"Karteikarten",t2:"Zuordnen",t3:"Übungstests",t4:"Lernzettel",t5:"Taschenrechner",t6:"Zusammenfassungen von Texten &amp; Videos",
+ h_note:"kinderleicht",h_h2:"Von „keine Ahnung“ zur Lösung in 3 Tipps",h_lead:"Keine Anmeldung, kein Stress. App öffnen und los.",
+ s1t:"Fotografieren.",s1p:"Fotografiere die Aufgabe oder tippe sie ein. Handschrift oder gedruckt, beides klappt.",
+ s2t:"Lösen.",s2p:"Unsere KI liest sie und liefert eine klare Lösung mit verständlich erklärtem Lösungsweg.",
+ s3t:"Lernen.",s3p:"Folge den Schritten, stell Rückfragen und versteh das „Warum“, nicht nur das „Was“.",
+ p_note:"einfache Preise",p_h2:"Starte kostenlos. Hol dir PRO, wenn du überzeugt bist.",p_lead:"Kostenlos bekommst du jeden Tag echte Hilfe. PRO hebt die Limits auf, blendet die Werbung aus und schaltet unser klügstes Modell frei.",
+ free:"Kostenlos",free_for:"Echte Hilfe, jeden Tag",forever:"/für immer",
+ fl1:"Kostenlose Fragen jeden Tag",fl2:"Schritt-für-Schritt-Erklärungen",fl3:"Eingabe per Foto &amp; Text",fl4:"KI-Tutor",fl5:"Karteikarten, Zuordnen, Übungstests &amp; Lernzettel",fl6:"Schreibassistent, Übersetzung &amp; Taschenrechner",fl7:"Zusammenfassungen von Texten, Websites &amp; Videos",
+ pro_for:"Keine Limits, keine Werbung",monthly:"Monatlich",yearly:"Jährlich",per_m:"/Monat",per_y:"/Jahr",trial:"Inklusive 3 Tage gratis testen",
+ pl1:"Alles aus Kostenlos",pl2:"Klügstes Modell",pl3:"Schnellere Antworten",pl4:"Unbegrenzt Fotos &amp; Chats",pl5:"Unbegrenzt Lernzettel &amp; Übungstests",pl6:"Unbegrenzte Tutor-Hilfe",pl7:"Keine Werbung",
+ fine:"US-Preise angezeigt. Preise können je nach Land variieren. Jederzeit kündbar in den Einstellungen von App Store oder Google Play.",
+ b_note:"dein Lernbuddy für die Hosentasche",b_h2:"Weniger Stress heute Abend. Bessere Noten dieses Halbjahr.",b_p:"Kostenlos laden. Deine erste Antwort ist nur ein Foto entfernt.",
+ ft_home:"Startseite",ft_support:"Support",ft_privacy:"Datenschutz",ft_terms:"Nutzungsbedingungen",top:"Nach oben"},
+
+pt:{name:"Português",code:"PT",
+ dd1:"clique!",dd2:"cada passo explicado",
+ nav_features:"Recursos",nav_how:"Como funciona",nav_pricing:"Preços",get_app:"Baixar o app",lang:"Idioma",
+ tagline:"Fotografe. Resolva. Aprenda.",h1a:"Lição de casa resolvida em ",h1b:"segundos!",
+ sub:"Travou em um problema difícil? É só tirar uma foto. O Solve My Homework AI te dá a resposta <b>e</b> uma explicação clara, passo a passo, para você aprender de verdade, e não só copiar.",
+ dl_on:"Baixar na",get_on:"Disponível no",perk1:"Grátis para começar",perk2:"Sem precisar de conta",perk3:"Disponível para iOS e Android!",
+ d1_tag:"Álgebra",d1_small:"Resolva para x",d1_title:"Passo a passo",d1_s1:"Subtraia 7 dos dois lados → 2x = 12",d1_s2:"Divida os dois lados por 2 → x = 6",d1_label:"Resposta:",
+ d2_tag:"Tutor IA",d2_small:"Pergunte ao Tutor IA",d2_big:"Por que 2⁰ = 1?",d2_title:"O tutor explica",d2_s1:"Veja o padrão: 2³ = 8 → 2² = 4 → 2¹ = 2",d2_s2:"Cada passo divide por 2, então 2⁰ = 2 ÷ 2 = 1",d2_label:"Então:",
+ d3_tag:"Traduzir",d3_small:"Traduzir para o português",d3_src:"¿Dónde está la biblioteca?",d3_title:"Tradução",d3_s1:"Idioma detectado: espanhol",d3_s2:"“dónde” = onde, “biblioteca” = biblioteca",d3_label:"Português:",d3_ans:"Onde fica a biblioteca?",
+ subjects:["Frações","Geometria","Álgebra","Cálculo","Ciências","História","Interpretação de texto","Redações e roteiros","Tradução","Problemas"],
+ f_note:"mais que respostas",f_h2:"Um app. Todas as matérias.",f_lead:"Um parceiro de estudos que explica, traduz, confere e escreve com você.",
+ c1t:"Fotografe a folha inteira",c1p:"Aponte a câmera para uma questão ou uma página inteira. Com o multi-foto, você resolve cada exercício, um por um.",
+ c2t:"Respostas passo a passo",c2p:"Veja exatamente como se chega à resposta, para fazer a próxima sozinho.",
+ c3t:"Pergunte “por quê?”",c3p:"Não entendeu o passo 2? Faça uma pergunta e o Tutor IA explica de outro jeito.",
+ c4t:"Traduza qualquer coisa",c4p:"Transforme textos e perguntas no idioma que você entende melhor.",
+ c5t:"Assistente de escrita",c5p:"Tenha ideias, monte roteiros e revise redações com uma ajuda que mantém o seu jeito de escrever.",
+ c6t:"Ferramentas de estudo inclusas",c6p:"Transforme o que você aprende em prática e pegue rapidinho a ideia principal de leituras longas.",
+ t1:"Flashcards",t2:"Associação",t3:"Simulados",t4:"Guias de estudo",t5:"Calculadora",t6:"Resumos de leituras e vídeos",
+ h_note:"simples demais",h_h2:"De travado a resolvido em 3 toques",h_lead:"Sem cadastro, sem complicação. Abra o app e pronto.",
+ s1t:"Fotografe.",s1p:"Tire uma foto do problema ou digite. Escrito à mão ou impresso, os dois funcionam.",
+ s2t:"Resolva.",s2p:"Nossa IA lê e devolve uma solução clara com o raciocínio explicado.",
+ s3t:"Aprenda.",s3p:"Siga os passos, faça perguntas e entenda o “porquê”, não só o “quê”.",
+ p_note:"preços simples",p_h2:"Comece grátis. Vire PRO quando se viciar.",p_lead:"No grátis você tem ajuda de verdade todo dia. O PRO tira os limites, esconde os anúncios e libera nosso modelo mais inteligente.",
+ free:"Grátis",free_for:"Ajuda de verdade, todo dia",forever:"/para sempre",
+ fl1:"Perguntas grátis todo dia",fl2:"Explicações passo a passo",fl3:"Foto e texto",fl4:"Tutor IA",fl5:"Flashcards, associação, simulados e guias de estudo",fl6:"Assistente de escrita, tradução e calculadora",fl7:"Resumos de leituras, sites e vídeos",
+ pro_for:"Sem limites, sem anúncios",monthly:"Mensal",yearly:"Anual",per_m:"/mês",per_y:"/ano",trial:"Inclui 3 dias de teste grátis",
+ pl1:"Tudo do Grátis",pl2:"Modelo mais inteligente",pl3:"Respostas mais rápidas",pl4:"Fotos e chats ilimitados",pl5:"Guias de estudo e simulados ilimitados",pl6:"Ajuda ilimitada do tutor",pl7:"Sem anúncios",
+ fine:"Preços dos EUA. Os preços podem variar por país. Cancele quando quiser nas configurações da App Store ou do Google Play.",
+ b_note:"seu parceiro de estudos de bolso",b_h2:"Menos estresse hoje à noite. Notas melhores neste semestre.",b_p:"Download grátis. Sua primeira resposta está a uma foto de distância.",
+ ft_home:"Início",ft_support:"Suporte",ft_privacy:"Política de Privacidade",ft_terms:"Termos",top:"Voltar ao topo"},
+
+zh:{name:"中文",code:"中文",
+ dd1:"咔嚓！",dd2:"每一步都讲清楚",
+ nav_features:"功能",nav_how:"使用方法",nav_pricing:"价格",get_app:"下载应用",lang:"语言",
+ tagline:"拍一拍，解一解，学会它。",h1a:"作业难题，",h1b:"几秒搞定！",
+ sub:"被难题卡住了？拍张照片就行。Solve My Homework AI 不仅给你答案，<b>还</b>给你清晰的分步讲解，让你真正学会，而不是照抄。",
+ dl_on:"下载于",get_on:"立即获取",perk1:"免费开始",perk2:"无需注册账号",perk3:"支持 iOS 和 Android！",
+ d1_tag:"代数",d1_small:"求 x",d1_title:"分步讲解",d1_s1:"两边同时减 7 → 2x = 12",d1_s2:"两边同时除以 2 → x = 6",d1_label:"答案：",
+ d2_tag:"AI 辅导",d2_small:"问问 AI 辅导",d2_big:"为什么 2⁰ = 1？",d2_title:"辅导老师讲解",d2_s1:"看规律：2³ = 8 → 2² = 4 → 2¹ = 2",d2_s2:"每一步都除以 2，所以 2⁰ = 2 ÷ 2 = 1",d2_label:"所以：",
+ d3_tag:"翻译",d3_small:"翻译成中文",d3_src:"¿Dónde está la biblioteca?",d3_title:"翻译",d3_s1:"检测到：西班牙语",d3_s2:"“dónde” = 哪里，“biblioteca” = 图书馆",d3_label:"中文：",d3_ans:"图书馆在哪里？",
+ subjects:["分数","几何","代数","微积分","科学","历史","阅读理解","作文与提纲","翻译","应用题"],
+ f_note:"不只是答案",f_h2:"一个应用，搞定所有科目。",f_lead:"一个会讲解、会翻译、会检查，还能陪你写作的学习伙伴。",
+ c1t:"整页作业一拍即解",c1p:"对准一道题或整页作业。多题拍摄让你一题一题地解完。",
+ c2t:"分步解答",c2p:"清楚看到答案是怎么得出的，下一题你就能自己做。",
+ c3t:"问“为什么？”",c3p:"第 2 步没看懂？继续追问，AI 辅导会换一种方式讲给你听。",
+ c4t:"什么都能翻译",c4p:"把文章和题目翻译成你最熟悉的语言。",
+ c5t:"写作助手",c5p:"头脑风暴、列提纲、润色作文，同时保留你自己的风格。",
+ c6t:"内置学习工具",c6p:"把学到的知识变成练习，快速抓住长篇阅读的重点。",
+ t1:"抽认卡",t2:"配对练习",t3:"模拟测试",t4:"学习指南",t5:"计算器",t6:"阅读与视频摘要",
+ h_note:"超级简单",h_h2:"点 3 下，从卡壳到解决",h_lead:"无需注册，没有麻烦。打开应用就能用。",
+ s1t:"拍一拍。",s1p:"给题目拍张照，或者直接输入。手写或印刷都可以。",
+ s2t:"解一解。",s2p:"AI 读懂题目，给出清晰的解答，并把思路讲明白。",
+ s3t:"学会它。",s3p:"跟着步骤走，继续追问，弄懂“为什么”，而不只是“是什么”。",
+ p_note:"价格简单",p_h2:"免费开始，喜欢再升级 PRO。",p_lead:"免费版每天都能真正帮到你。PRO 解除限制、去除广告，并解锁我们最聪明的模型。",
+ free:"免费",free_for:"每天都有真正的帮助",forever:"/永久",
+ fl1:"每天免费提问",fl2:"分步讲解",fl3:"拍照和文字输入",fl4:"AI 辅导",fl5:"抽认卡、配对练习、模拟测试和学习指南",fl6:"写作助手、翻译和计算器",fl7:"阅读、网页和视频摘要",
+ pro_for:"无限制、无广告",monthly:"按月",yearly:"按年",per_m:"/月",per_y:"/年",trial:"含 3 天免费试用",
+ pl1:"包含免费版所有功能",pl2:"最聪明的模型",pl3:"更快的回答",pl4:"无限拍照和对话",pl5:"无限学习指南和模拟测试",pl6:"无限辅导帮助",pl7:"无广告",
+ fine:"显示的是美国价格，各国价格可能不同。可随时在 App Store 或 Google Play 设置中取消。",
+ b_note:"你的口袋学习伙伴",b_h2:"今晚压力更小，这学期成绩更好。",b_p:"免费下载。拍一张照片，就能得到第一个答案。",
+ ft_home:"首页",ft_support:"支持",ft_privacy:"隐私政策",ft_terms:"条款",top:"返回顶部"},
+
+ja:{name:"日本語",code:"JA",
+ dd1:"パシャ！",dd2:"手順を全部見せる",
+ nav_features:"機能",nav_how:"使い方",nav_pricing:"料金",get_app:"アプリを入手",lang:"言語",
+ tagline:"撮って、解いて、身につける。",h1a:"宿題が、",h1b:"数秒でわかる！",
+ sub:"難しい問題で手が止まった？写真を撮るだけ。Solve My Homework AI が答え<b>と</b>わかりやすいステップごとの解説を届けるので、写すだけでなく、ちゃんと理解できます。",
+ dl_on:"ダウンロード",get_on:"今すぐ入手",perk1:"無料で始められる",perk2:"アカウント不要",perk3:"iOS と Android に対応！",
+ d1_tag:"代数",d1_small:"x を求めよ",d1_title:"ステップごとの解説",d1_s1:"両辺から 7 を引く → 2x = 12",d1_s2:"両辺を 2 で割る → x = 6",d1_label:"答え：",
+ d2_tag:"AI チューター",d2_small:"AI チューターに質問",d2_big:"なぜ 2⁰ = 1？",d2_title:"チューターの解説",d2_s1:"パターンを見よう：2³ = 8 → 2² = 4 → 2¹ = 2",d2_s2:"1 つ進むごとに 2 で割るので、2⁰ = 2 ÷ 2 = 1",d2_label:"だから：",
+ d3_tag:"翻訳",d3_small:"日本語に翻訳",d3_src:"¿Dónde está la biblioteca?",d3_title:"翻訳",d3_s1:"検出：スペイン語",d3_s2:"「dónde」= どこ、「biblioteca」= 図書館",d3_label:"日本語：",d3_ans:"図書館はどこですか？",
+ subjects:["分数","図形","代数","微積分","理科","歴史","読解問題","作文・構成メモ","翻訳","文章題"],
+ f_note:"答え以上のもの",f_h2:"アプリひとつで、全教科。",f_lead:"解説も、翻訳も、チェックも、文章づくりも手伝ってくれる勉強仲間。",
+ c1t:"プリントをまるごと撮影",c1p:"1 問だけでもページ全体でも、カメラを向けるだけ。マルチスナップで 1 問ずつ解いていけます。",
+ c2t:"ステップごとの解答",c2p:"答えまでの道筋がはっきり見えるから、次の問題は自分で解けるように。",
+ c3t:"「なぜ？」と聞ける",c3p:"ステップ 2 がわからない？質問すれば、AI チューターが別の言い方で説明します。",
+ c4t:"なんでも翻訳",c4p:"文章や問題を、いちばんわかりやすい言語に。",
+ c5t:"ライティング アシスタント",c5p:"アイデア出し、構成づくり、作文の仕上げまで。あなたらしい文体はそのまま。",
+ c6t:"学習ツールも搭載",c6p:"学んだことを練習に変えて、長い文章の要点もすばやくつかめます。",
+ t1:"単語カード",t2:"マッチング",t3:"模擬テスト",t4:"学習ガイド",t5:"電卓",t6:"文章・動画の要約",
+ h_note:"とってもかんたん",h_h2:"3 タップで、つまずきから解決へ",h_lead:"登録も面倒もなし。アプリを開けばすぐ使えます。",
+ s1t:"撮って。",s1p:"問題を写真に撮るか、文字で入力。手書きでも印刷でも OK。",
+ s2t:"解いて。",s2p:"AI が問題を読み取り、考え方をわかりやすく示した解答を返します。",
+ s3t:"身につける。",s3p:"ステップをたどって、質問して、「何か」だけでなく「なぜ」まで理解しよう。",
+ p_note:"シンプルな料金",p_h2:"まずは無料で。気に入ったら PRO へ。",p_lead:"無料版でも毎日しっかり役立ちます。PRO なら制限なし、広告なし、いちばん賢いモデルも使えます。",
+ free:"無料",free_for:"毎日しっかりサポート",forever:"/ずっと",
+ fl1:"毎日の無料質問",fl2:"ステップごとの解説",fl3:"写真とテキストで入力",fl4:"AI チューター",fl5:"単語カード、マッチング、模擬テスト、学習ガイド",fl6:"ライティング アシスタント、翻訳、電卓",fl7:"文章・ウェブサイト・動画の要約",
+ pro_for:"制限なし、広告なし",monthly:"月額",yearly:"年額",per_m:"/月",per_y:"/年",trial:"3 日間の無料トライアル付き",
+ pl1:"無料版のすべての機能",pl2:"いちばん賢いモデル",pl3:"より速い回答",pl4:"撮影とチャットが無制限",pl5:"学習ガイドと模擬テストが無制限",pl6:"チューターのサポートが無制限",pl7:"広告なし",
+ fine:"表示は米国での価格です。価格は国によって異なる場合があります。App Store または Google Play の設定からいつでも解約できます。",
+ b_note:"ポケットの中の勉強仲間",b_h2:"今夜はストレスを少なく。今学期は成績アップ。",b_p:"ダウンロード無料。写真 1 枚で、最初の答えが届きます。",
+ ft_home:"ホーム",ft_support:"サポート",ft_privacy:"プライバシーポリシー",ft_terms:"利用規約",top:"トップへ戻る"},
+
+ko:{name:"한국어",code:"KO",
+ dd1:"찰칵!",dd2:"모든 단계를 보여 줘요",
+ nav_features:"기능",nav_how:"사용 방법",nav_pricing:"요금",get_app:"앱 받기",lang:"언어",
+ tagline:"찍고. 풀고. 배우고.",h1a:"숙제, ",h1b:"몇 초 만에 해결!",
+ sub:"어려운 문제에서 막혔나요? 사진만 찍으세요. Solve My Homework AI가 답<b>과</b> 함께 단계별로 쉽게 설명해 줘서, 그냥 베끼는 게 아니라 제대로 이해할 수 있어요.",
+ dl_on:"지금 다운로드",get_on:"지금 다운로드",perk1:"무료로 시작",perk2:"계정 필요 없음",perk3:"iOS와 Android에서 이용 가능!",
+ d1_tag:"대수",d1_small:"x의 값 구하기",d1_title:"단계별 풀이",d1_s1:"양변에서 7을 빼기 → 2x = 12",d1_s2:"양변을 2로 나누기 → x = 6",d1_label:"정답:",
+ d2_tag:"AI 튜터",d2_small:"AI 튜터에게 질문",d2_big:"왜 2⁰ = 1일까요?",d2_title:"튜터의 설명",d2_s1:"규칙을 보세요: 2³ = 8 → 2² = 4 → 2¹ = 2",d2_s2:"매번 2로 나누니까 2⁰ = 2 ÷ 2 = 1",d2_label:"그래서:",
+ d3_tag:"번역",d3_small:"한국어로 번역",d3_src:"¿Dónde está la biblioteca?",d3_title:"번역",d3_s1:"감지된 언어: 스페인어",d3_s2:"“dónde” = 어디, “biblioteca” = 도서관",d3_label:"한국어:",d3_ans:"도서관이 어디에 있나요?",
+ subjects:["분수","기하","대수","미적분","과학","역사","독해 지문","에세이와 개요","번역","서술형 문제"],
+ f_note:"답 그 이상",f_h2:"앱 하나로 모든 과목을.",f_lead:"설명하고, 번역하고, 확인하고, 함께 글도 써 주는 공부 친구.",
+ c1t:"학습지 한 장을 통째로",c1p:"문제 하나 또는 한 페이지 전체에 카메라를 대세요. 멀티 스냅으로 모든 문제를 하나씩 풀 수 있어요.",
+ c2t:"단계별 풀이",c2p:"답이 어떻게 나오는지 정확히 보여 줘서, 다음 문제는 혼자서도 쉽게 풀 수 있어요.",
+ c3t:"“왜?”라고 물어보세요",c3p:"2단계가 헷갈리나요? 다시 물어보면 AI 튜터가 다른 방식으로 설명해 줘요.",
+ c4t:"무엇이든 번역",c4p:"지문과 문제를 가장 잘 이해하는 언어로 바꿔 보세요.",
+ c5t:"글쓰기 도우미",c5p:"아이디어를 떠올리고, 개요를 짜고, 에세이를 다듬어요. 내 문체는 그대로 지켜 줘요.",
+ c6t:"학습 도구 내장",c6p:"배운 내용을 연습으로 바꾸고, 긴 글의 요점을 빠르게 파악하세요.",
+ t1:"플래시카드",t2:"짝 맞추기",t3:"모의고사",t4:"학습 가이드",t5:"계산기",t6:"읽기 자료 및 영상 요약",
+ h_note:"정말 간단해요",h_h2:"3번 탭으로 막힘에서 해결까지",h_lead:"가입도, 번거로움도 없어요. 앱을 열고 바로 시작하세요.",
+ s1t:"찍고.",s1p:"문제를 사진으로 찍거나 직접 입력하세요. 손글씨도 인쇄물도 모두 돼요.",
+ s2t:"풀고.",s2p:"AI가 문제를 읽고, 풀이 과정을 쉽게 정리한 명확한 답을 알려 줘요.",
+ s3t:"배우고.",s3p:"단계를 따라가고, 궁금한 건 다시 묻고, ‘무엇’뿐 아니라 ‘왜’까지 이해하세요.",
+ p_note:"간단한 요금",p_h2:"무료로 시작하고, 마음에 들면 PRO로.",p_lead:"무료 버전으로도 매일 제대로 도움을 받아요. PRO는 제한을 없애고, 광고를 숨기고, 가장 똑똑한 모델을 열어 줘요.",
+ free:"무료",free_for:"매일 받는 진짜 도움",forever:"/평생",
+ fl1:"매일 무료 질문",fl2:"단계별 설명",fl3:"사진 및 텍스트 입력",fl4:"AI 튜터",fl5:"플래시카드, 짝 맞추기, 모의고사, 학습 가이드",fl6:"글쓰기 도우미, 번역, 계산기",fl7:"읽기 자료, 웹사이트, 영상 요약",
+ pro_for:"제한 없이, 광고 없이",monthly:"월간",yearly:"연간",per_m:"/월",per_y:"/년",trial:"3일 무료 체험 포함",
+ pl1:"무료 버전의 모든 기능",pl2:"가장 똑똑한 모델",pl3:"더 빠른 답변",pl4:"무제한 사진 및 채팅",pl5:"무제한 학습 가이드 및 모의고사",pl6:"무제한 튜터 도움",pl7:"광고 없음",
+ fine:"미국 가격 기준이며, 국가에 따라 다를 수 있어요. App Store 또는 Google Play 설정에서 언제든지 해지할 수 있어요.",
+ b_note:"주머니 속 공부 친구",b_h2:"오늘 밤은 스트레스 덜, 이번 학기는 성적 더.",b_p:"무료 다운로드. 사진 한 장이면 첫 답을 받을 수 있어요.",
+ ft_home:"홈",ft_support:"고객 지원",ft_privacy:"개인정보 처리방침",ft_terms:"이용약관",top:"맨 위로"},
+
+hi:{name:"हिन्दी",code:"HI",
+ dd1:"क्लिक!",dd2:"हर स्टेप साफ़",
+ nav_features:"फ़ीचर्स",nav_how:"यह कैसे काम करता है",nav_pricing:"कीमतें",get_app:"ऐप पाएं",lang:"भाषा",
+ tagline:"फ़ोटो लो। हल करो। सीखो।",h1a:"होमवर्क, ",h1b:"सेकंडों में हल!",
+ sub:"किसी मुश्किल सवाल पर अटक गए? बस एक फ़ोटो लो। Solve My Homework AI आपको जवाब <b>और</b> साफ़, स्टेप-बाय-स्टेप समझाता है, ताकि आप सच में सीखें, सिर्फ़ नकल न करें।",
+ dl_on:"डाउनलोड करें",get_on:"अभी पाएं",perk1:"शुरुआत मुफ़्त",perk2:"अकाउंट की ज़रूरत नहीं",perk3:"iOS और Android पर उपलब्ध!",
+ d1_tag:"बीजगणित",d1_small:"x का मान निकालें",d1_title:"स्टेप-बाय-स्टेप",d1_s1:"दोनों तरफ़ से 7 घटाएं → 2x = 12",d1_s2:"दोनों तरफ़ 2 से भाग दें → x = 6",d1_label:"जवाब:",
+ d2_tag:"AI ट्यूटर",d2_small:"AI ट्यूटर से पूछें",d2_big:"2⁰ = 1 क्यों?",d2_title:"ट्यूटर समझाता है",d2_s1:"पैटर्न देखें: 2³ = 8 → 2² = 4 → 2¹ = 2",d2_s2:"हर स्टेप में 2 से भाग, इसलिए 2⁰ = 2 ÷ 2 = 1",d2_label:"तो:",
+ d3_tag:"अनुवाद",d3_small:"हिंदी में अनुवाद करें",d3_src:"¿Dónde está la biblioteca?",d3_title:"अनुवाद",d3_s1:"पहचानी गई भाषा: स्पैनिश",d3_s2:"“dónde” = कहाँ, “biblioteca” = लाइब्रेरी",d3_label:"हिंदी:",d3_ans:"लाइब्रेरी कहाँ है?",
+ subjects:["भिन्न","ज्यामिति","बीजगणित","कैलकुलस","विज्ञान","इतिहास","पढ़ने के अंश","निबंध और रूपरेखा","अनुवाद","शाब्दिक सवाल"],
+ f_note:"जवाबों से भी ज़्यादा",f_h2:"एक ऐप। हर विषय।",f_lead:"एक स्टडी बडी जो समझाता है, अनुवाद करता है, जाँचता है और आपके साथ लिखता है।",
+ c1t:"पूरी वर्कशीट की फ़ोटो लें",c1p:"कैमरा एक सवाल या पूरे पेज पर रखें। मल्टी-स्नैप से हर सवाल एक-एक करके हल करें।",
+ c2t:"स्टेप-बाय-स्टेप जवाब",c2p:"देखें कि जवाब तक कैसे पहुँचते हैं, ताकि अगला सवाल आप खुद आसानी से कर सकें।",
+ c3t:"पूछें “क्यों?”",c3p:"स्टेप 2 समझ नहीं आया? दोबारा पूछें और AI ट्यूटर दूसरे तरीके से समझाएगा।",
+ c4t:"कुछ भी अनुवाद करें",c4p:"पाठ और सवालों को उस भाषा में बदलें जो आप सबसे अच्छी तरह समझते हैं।",
+ c5t:"राइटिंग असिस्टेंट",c5p:"आइडिया सोचें, रूपरेखा बनाएं और निबंध निखारें, आपकी अपनी शैली के साथ।",
+ c6t:"स्टडी टूल्स साथ में",c6p:"जो सीखा उसे प्रैक्टिस में बदलें, और लंबे पाठों का सार जल्दी समझें।",
+ t1:"फ़्लैशकार्ड",t2:"मिलान",t3:"प्रैक्टिस टेस्ट",t4:"स्टडी गाइड",t5:"कैलकुलेटर",t6:"पाठ और वीडियो सारांश",
+ h_note:"बेहद आसान",h_h2:"3 टैप में, अटकने से हल तक",h_lead:"न साइन-अप, न झंझट। ऐप खोलें और शुरू करें।",
+ s1t:"फ़ोटो लो।",s1p:"सवाल की फ़ोटो लें या टाइप करें। हाथ से लिखा हो या छपा हुआ, दोनों चलेंगे।",
+ s2t:"हल करो।",s2p:"हमारा AI इसे पढ़कर साफ़ हल देता है, सोचने का तरीका आसान शब्दों में।",
+ s3t:"सीखो।",s3p:"स्टेप्स फ़ॉलो करें, सवाल पूछें, और सिर्फ़ “क्या” नहीं, “क्यों” भी समझें।",
+ p_note:"आसान कीमतें",p_h2:"मुफ़्त में शुरू करें। पसंद आए तो PRO लें।",p_lead:"मुफ़्त वर्ज़न हर दिन असली मदद देता है। PRO सारी सीमाएं हटाता है, विज्ञापन छिपाता है और हमारा सबसे स्मार्ट मॉडल खोलता है।",
+ free:"मुफ़्त",free_for:"हर दिन असली मदद",forever:"/हमेशा",
+ fl1:"हर दिन मुफ़्त सवाल",fl2:"स्टेप-बाय-स्टेप समझाना",fl3:"फ़ोटो और टेक्स्ट इनपुट",fl4:"AI ट्यूटर",fl5:"फ़्लैशकार्ड, मिलान, प्रैक्टिस टेस्ट और स्टडी गाइड",fl6:"राइटिंग असिस्टेंट, अनुवाद और कैलकुलेटर",fl7:"पाठ, वेबसाइट और वीडियो सारांश",
+ pro_for:"कोई सीमा नहीं, कोई विज्ञापन नहीं",monthly:"मासिक",yearly:"सालाना",per_m:"/महीना",per_y:"/साल",trial:"3 दिन का मुफ़्त ट्रायल शामिल",
+ pl1:"मुफ़्त वर्ज़न की हर चीज़",pl2:"सबसे स्मार्ट मॉडल",pl3:"तेज़ जवाब",pl4:"अनलिमिटेड फ़ोटो और चैट",pl5:"अनलिमिटेड स्टडी गाइड और प्रैक्टिस टेस्ट",pl6:"अनलिमिटेड ट्यूटर मदद",pl7:"कोई विज्ञापन नहीं",
+ fine:"दिखाई गई कीमतें अमेरिका की हैं। देश के हिसाब से कीमतें अलग हो सकती हैं। App Store या Google Play की सेटिंग में कभी भी रद्द करें।",
+ b_note:"आपका पॉकेट स्टडी बडी",b_h2:"आज रात कम तनाव। इस टर्म बेहतर नंबर।",b_p:"मुफ़्त डाउनलोड। आपका पहला जवाब बस एक फ़ोटो दूर है।",
+ ft_home:"होम",ft_support:"सपोर्ट",ft_privacy:"प्राइवेसी पॉलिसी",ft_terms:"शर्तें",top:"ऊपर जाएं"},
+
+ar:{name:"العربية",code:"AR",rtl:true,
+ dd1:"تصوير!",dd2:"كل خطوة موضّحة",
+ nav_features:"المزايا",nav_how:"كيف يعمل",nav_pricing:"الأسعار",get_app:"حمّل التطبيق",lang:"اللغة",
+ tagline:"صوّرها. حلّها. تعلّمها.",h1a:"واجباتك محلولة في ",h1b:"ثوانٍ!",
+ sub:"عالق في مسألة صعبة؟ فقط التقط صورة. يعطيك Solve My Homework AI الإجابة <b>و</b>شرحًا واضحًا خطوة بخطوة، لتتعلّمها فعلًا بدل أن تنسخها فقط.",
+ dl_on:"حمّله من",get_on:"احصل عليه من",perk1:"مجاني للبدء",perk2:"بدون حساب",perk3:"متوفر على iOS وAndroid!",
+ d1_tag:"الجبر",d1_small:"أوجد قيمة x",d1_title:"خطوة بخطوة",d1_s1:"اطرح 7 من الطرفين: 2x = 12",d1_s2:"اقسم الطرفين على 2: x = 6",d1_label:"الإجابة:",
+ d2_tag:"المعلّم الذكي",d2_small:"اسأل المعلّم الذكي",d2_big:"لماذا 2⁰ = 1؟",d2_title:"المعلّم يشرح",d2_s1:"لاحظ النمط: 2³ = 8، 2² = 4، 2¹ = 2",d2_s2:"كل خطوة قسمة على 2، إذن 2⁰ = 2 ÷ 2 = 1",d2_label:"إذن:",
+ d3_tag:"ترجمة",d3_small:"ترجم إلى العربية",d3_src:"¿Dónde está la biblioteca?",d3_title:"الترجمة",d3_s1:"اللغة المكتشفة: الإسبانية",d3_s2:"«dónde» = أين، «biblioteca» = مكتبة",d3_label:"بالعربية:",d3_ans:"أين المكتبة؟",
+ subjects:["الكسور","الهندسة","الجبر","التفاضل والتكامل","العلوم","التاريخ","نصوص القراءة","المقالات والمخططات","الترجمة","المسائل الكلامية"],
+ f_note:"أكثر من مجرد إجابات",f_h2:"تطبيق واحد. لكل المواد.",f_lead:"رفيق دراسة يشرح ويترجم ويراجع ويكتب معك.",
+ c1t:"صوّر ورقة كاملة",c1p:"وجّه الكاميرا إلى سؤال واحد أو صفحة كاملة. مع التصوير المتعدد تحل كل مسألة، واحدة تلو الأخرى.",
+ c2t:"إجابات خطوة بخطوة",c2p:"شاهد بالضبط كيف نصل إلى الإجابة، لتحل التالية بنفسك بسهولة.",
+ c3t:"اسأل «لماذا؟»",c3p:"لم تفهم الخطوة 2؟ اسأل سؤالًا آخر وسيشرحها لك المعلّم الذكي بطريقة مختلفة.",
+ c4t:"ترجم أي شيء",c4p:"حوّل النصوص والأسئلة إلى اللغة التي تفهمها أكثر.",
+ c5t:"مساعد الكتابة",c5p:"اجمع الأفكار وضع المخططات وحسّن مقالاتك مع مساعد يحافظ على أسلوبك.",
+ c6t:"أدوات دراسة مدمجة",c6p:"حوّل ما تتعلمه إلى تدريب، والتقط خلاصة القراءات الطويلة بسرعة.",
+ t1:"بطاقات تعليمية",t2:"مطابقة",t3:"اختبارات تدريبية",t4:"أدلة دراسة",t5:"آلة حاسبة",t6:"ملخصات القراءات والفيديوهات",
+ h_note:"بسيط جدًا",h_h2:"من الحيرة إلى الحل في 3 نقرات",h_lead:"بدون تسجيل وبدون تعقيد. افتح التطبيق وابدأ.",
+ s1t:"صوّرها.",s1p:"التقط صورة للمسألة أو اكتبها. بخط اليد أو مطبوعة، كلاهما يعمل.",
+ s2t:"حلّها.",s2p:"يقرأ الذكاء الاصطناعي المسألة ويعطيك حلًا واضحًا مع شرح الخطوات ببساطة.",
+ s3t:"تعلّمها.",s3p:"اتبع الخطوات، واسأل سؤالًا إضافيًا، وافهم «لماذا» وليس فقط «ماذا».",
+ p_note:"أسعار بسيطة",p_h2:"ابدأ مجانًا. انتقل إلى PRO عندما تعجبك التجربة.",p_lead:"النسخة المجانية تساعدك فعلًا كل يوم. PRO يزيل الحدود ويخفي الإعلانات ويفتح أذكى نماذجنا.",
+ free:"مجاني",free_for:"مساعدة حقيقية كل يوم",forever:"/للأبد",
+ fl1:"أسئلة مجانية كل يوم",fl2:"شروحات خطوة بخطوة",fl3:"إدخال بالصورة والنص",fl4:"المعلّم الذكي",fl5:"بطاقات تعليمية ومطابقة واختبارات تدريبية وأدلة دراسة",fl6:"مساعد الكتابة والترجمة والآلة الحاسبة",fl7:"ملخصات القراءات والمواقع والفيديوهات",
+ pro_for:"بلا حدود وبلا إعلانات",monthly:"شهري",yearly:"سنوي",per_m:"/شهريًا",per_y:"/سنويًا",trial:"يشمل تجربة مجانية لمدة 3 أيام",
+ pl1:"كل ما في المجاني",pl2:"أذكى نموذج",pl3:"إجابات أسرع",pl4:"صور ومحادثات بلا حدود",pl5:"أدلة دراسة واختبارات تدريبية بلا حدود",pl6:"مساعدة غير محدودة من المعلّم",pl7:"بدون إعلانات",
+ fine:"الأسعار المعروضة بالدولار الأمريكي وقد تختلف حسب البلد. ألغِ الاشتراك في أي وقت من إعدادات App Store أو Google Play.",
+ b_note:"رفيق دراستك في جيبك",b_h2:"توتر أقل الليلة. درجات أفضل هذا الفصل.",b_p:"التحميل مجاني. إجابتك الأولى على بُعد صورة واحدة.",
+ ft_home:"الرئيسية",ft_support:"الدعم",ft_privacy:"سياسة الخصوصية",ft_terms:"الشروط",top:"العودة للأعلى"}
+};
+var LANG_ORDER=['en','es','fr','de','pt','zh','ja','ko','hi','ar'];
+
+(function(){
+  var root=document.documentElement;
+  root.classList.add('js');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  requestAnimationFrame(function(){requestAnimationFrame(function(){root.classList.add('loaded');});});
+
+  /* ---------- language ---------- */
+  var cur='en';
+  function T(k){var d=I18N[cur]||I18N.en;return (d[k]!==undefined?d[k]:I18N.en[k]);}
+  function save(l){try{localStorage.setItem('smh_lang',l);}catch(e){}}
+  function saved(){try{return localStorage.getItem('smh_lang');}catch(e){return null;}}
+  function detect(){
+    var s=saved(); if(s&&I18N[s])return s;
+    var list=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'en'];
+    for(var i=0;i<list.length;i++){var p=String(list[i]).toLowerCase().split('-')[0];if(I18N[p])return p;}
+    return 'en';
+  }
+  function renderTicker(){
+    var t=document.getElementById('ticker'),icons=['🧮','📐','✖️','📈','🧪','🏛️','📖','✍️','🌍','🧩'],sub=T('subjects'),h='';
+    for(var r=0;r<2;r++)for(var i=0;i<sub.length;i++)h+='<span>'+icons[i]+' '+sub[i]+'</span>';
+    t.innerHTML=h;
+  }
+  var menu=document.getElementById('langMenu'),langBox=document.getElementById('lang'),langBtn=document.getElementById('langBtn');
+  LANG_ORDER.forEach(function(l){
+    var li=document.createElement('li');li.setAttribute('role','none');
+    var b=document.createElement('button');b.type='button';b.setAttribute('role','menuitemradio');b.dataset.lang=l;
+    b.innerHTML='<span>'+I18N[l].name+'</span><small>'+I18N[l].code+'</small>';
+    b.addEventListener('click',function(){setLang(l,true);closeMenu();langBtn.focus();});
+    li.appendChild(b);menu.appendChild(li);
+  });
+  function openMenu(){langBox.classList.add('open');langBtn.setAttribute('aria-expanded','true');var c=menu.querySelector('[aria-checked="true"]')||menu.querySelector('button');c&&c.focus();}
+  function closeMenu(){langBox.classList.remove('open');langBtn.setAttribute('aria-expanded','false');}
+  langBtn.addEventListener('click',function(e){e.stopPropagation();langBox.classList.contains('open')?closeMenu():openMenu();});
+  document.addEventListener('click',function(e){if(!langBox.contains(e.target))closeMenu();});
+  document.addEventListener('keydown',function(e){
+    if(!langBox.classList.contains('open'))return;
+    var items=[].slice.call(menu.querySelectorAll('button')),i=items.indexOf(document.activeElement);
+    if(e.key==='Escape'){closeMenu();langBtn.focus();}
+    else if(e.key==='ArrowDown'){e.preventDefault();items[(i+1)%items.length].focus();}
+    else if(e.key==='ArrowUp'){e.preventDefault();items[(i-1+items.length)%items.length].focus();}
+  });
+
+  function setLang(l,user){
+    if(!I18N[l])l='en';cur=l;if(user)save(l);
+    root.lang=(l==='zh'?'zh-Hans':l);root.dir=I18N[l].rtl?'rtl':'ltr';
+    document.querySelectorAll('[data-i18n]').forEach(function(el){el.innerHTML=T(el.getAttribute('data-i18n'));});
+    document.querySelectorAll('[data-i18n-aria]').forEach(function(el){el.setAttribute('aria-label',T(el.getAttribute('data-i18n-aria')));});
+    document.getElementById('langCode').textContent=I18N[l].code;
+    langBtn.setAttribute('aria-label',T('lang')+': '+I18N[l].name);
+    menu.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-checked',b.dataset.lang===l?'true':'false');});
+    renderTicker();
+    updatePlan();
+    if(typeof demoReady!=='undefined'&&demoReady)play(idx);
+    requestAnimationFrame(initPill);
+  }
+
+  /* ---------- scroll reveal ---------- */
+  var els=document.querySelectorAll('.reveal,.step');
+  if('IntersectionObserver' in window && !reduce){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
+    },{threshold:.15,rootMargin:'0px 0px -40px 0px'});
+    els.forEach(function(el){io.observe(el);});
+  } else { els.forEach(function(el){el.classList.add('in');}); }
+  setTimeout(function(){els.forEach(function(el){if(el.getBoundingClientRect().top<innerHeight)el.classList.add('in');});},2500);
+
+  /* ---------- header shadow, progress bar, back-to-top, active link ---------- */
+  var header=document.querySelector('header'),bar=document.querySelector('.progress'),top=document.querySelector('.top');
+  var links=[].slice.call(document.querySelectorAll('.navlinks a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'));});
+  function onScroll(){
+    var y=scrollY,h=document.documentElement.scrollHeight-innerHeight;
+    header.classList.toggle('scrolled',y>8);
+    bar.style.transform='scaleX('+(h>0?y/h:0)+')';
+    top.classList.toggle('show',y>innerHeight*.8);
+    var c=-1;secs.forEach(function(s,i){if(s&&s.getBoundingClientRect().top<innerHeight*.4)c=i;});
+    links.forEach(function(a,i){a.classList.toggle('active',i===c);});
+  }
+  function measureHeader(){root.style.setProperty('--hh',header.offsetHeight+'px');}
+  measureHeader();addEventListener('resize',measureHeader);
+  if(window.ResizeObserver)new ResizeObserver(measureHeader).observe(header);
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
+  top.addEventListener('click',function(){scrollTo({top:0,behavior:reduce?'auto':'smooth'});});
+
+  /* ---------- hero demo: 1) algebra  2) AI Tutor  3) translation ---------- */
+  var demo=document.getElementById('demo'),steps=demo.querySelectorAll('.st');
+  var dots=[].slice.call(document.querySelectorAll('#dots button'));
+  var idx=0,timers=[],demoReady=false;
+  function item(i){
+    if(i===0)return{tag:T('d1_tag'),small:T('d1_small'),big:'2x + 7 = 19',size:'38px',title:T('d1_title'),s1:T('d1_s1'),s2:T('d1_s2'),label:T('d1_label'),ans:'x = 6'};
+    if(i===1)return{tag:T('d2_tag'),small:T('d2_small'),big:T('d2_big'),size:'32px',title:T('d2_title'),s1:T('d2_s1'),s2:T('d2_s2'),label:T('d2_label'),ans:'2⁰ = 1'};
+    return{tag:T('d3_tag'),small:T('d3_small'),big:T('d3_src'),size:'29px',title:T('d3_title'),s1:T('d3_s1'),s2:T('d3_s2'),label:T('d3_label'),ans:T('d3_ans')};
+  }
+  function clear(){timers.forEach(clearTimeout);timers=[];}
+  function at(ms,fn){timers.push(setTimeout(fn,ms));}
+  function nb(t){return String(t).replace(/ ([=÷→]) /g,'\u00A0$1\u00A0').replace(/ (\d+[⁰¹²³]?)$/,'\u00A0$1');}
+  function fill(i){
+    var p=item(i),pr=document.getElementById('dProblem');
+    ['big','s1','s2','ans'].forEach(function(k){p[k]=nb(p[k]);});
+    document.getElementById('dTag').textContent=p.tag;
+    pr.style.setProperty('--psize',p.size);
+    pr.innerHTML='<small></small>';pr.firstChild.textContent=p.small;pr.appendChild(document.createTextNode(p.big));
+    document.getElementById('dTitle').textContent=p.title;
+    document.getElementById('dS1').textContent=p.s1;
+    document.getElementById('dS2').textContent=p.s2;
+    document.getElementById('dLabel').textContent=p.label;
+    document.getElementById('dAns').textContent=p.ans;
+    document.getElementById('dSheet').dir=root.dir;
+    dots.forEach(function(d,j){var c=d.cloneNode(true);c.setAttribute('aria-current',j===i?'true':'false');d.parentNode.replaceChild(c,d);dots[j]=c;c.addEventListener('click',function(){play(j);});});
+  }
+  function play(i){
+    clear();idx=i;fill(i);
+    if(reduce){steps.forEach(function(s){s.classList.add('on');});demo.dataset.stage='done';return;}
+    steps.forEach(function(s){s.classList.remove('on');});
+    demo.dataset.stage='scan';
+    at(2200,function(){demo.dataset.stage='snap';});
+    at(2700,function(){demo.dataset.stage='solve';});
+    at(3400,function(){steps[0].classList.add('on');});
+    at(4200,function(){steps[1].classList.add('on');});
+    at(5000,function(){demo.dataset.stage='done';});
+    at(8600,function(){play((idx+1)%3);});
+  }
+  document.addEventListener('visibilitychange',function(){if(document.hidden)clear();else play(idx);});
+
+  /* ---------- PRO monthly / yearly toggle ---------- */
+  var btns=[].slice.call(document.querySelectorAll('.toggle button')),pill=document.querySelector('.toggle .pill-bg');
+  var amt=document.getElementById('pAmt'),per=document.getElementById('pPer'),trial=document.getElementById('pTrial');
+  var plan='m';
+  function updatePlan(){
+    amt.textContent=plan==='y'?'$69.99':'$9.99';
+    per.textContent=plan==='y'?T('per_y'):T('per_m');
+    trial.innerHTML=plan==='y'?T('trial'):'&nbsp;';
+  }
+  function initPill(){var b=btns.filter(function(x){return x.getAttribute('aria-pressed')==='true';})[0];if(!b)return;pill.style.width=b.offsetWidth+'px';pill.style.transform='translateX('+b.offsetLeft+'px)';}
+  btns.forEach(function(b){b.addEventListener('click',function(){
+    btns.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    plan=b.dataset.plan;initPill();
+    amt.classList.add('swap');
+    setTimeout(function(){updatePlan();amt.classList.remove('swap');},reduce?0:180);
+  });});
+  addEventListener('resize',initPill);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(initPill);
+
+  /* ---------- start ---------- */
+  setLang(detect(),false);
+  demoReady=true;play(0);
+})();
+</script>
 </body></html>
