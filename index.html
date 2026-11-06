@@ -436,7 +436,7 @@
         <button type="button" aria-pressed="true" data-plan="m" data-i18n="monthly">Monthly</button>
         <button type="button" aria-pressed="false" data-plan="y" data-i18n="yearly">Yearly</button>
       </div>
-      <div class="price"><span class="amt" id="pAmt">$9.99</span><span id="pPer">/month</span></div>
+      <div class="price"><span class="amt" id="pAmt">$4.99</span><span id="pPer">/month</span></div>
       <div class="trial" id="pTrial" aria-live="polite">&nbsp;</div>
       <ul class="list">
         <li data-i18n="pl1">Everything in Free</li>
@@ -924,7 +924,7 @@ var LANG_ORDER=['en','es','fr','de','pt','zh','ja','ko','hi','ar'];
   var amt=document.getElementById('pAmt'),per=document.getElementById('pPer'),trial=document.getElementById('pTrial');
   var plan='m';
   function updatePlan(){
-    amt.textContent=plan==='y'?'$69.99':'$9.99';
+    amt.textContent=plan==='y'?'$29.99':'$4.99';
     per.textContent=plan==='y'?T('per_y'):T('per_m');
     trial.innerHTML=plan==='y'?T('trial'):'&nbsp;';
   }
